@@ -51,7 +51,11 @@ struct ContentView: View {
                 } else {
                     List(results) { item in
                         NavigationLink {
-                            DiscogsArtistDetailView(item: item)
+                            DiscogsArtistDetailView(
+                                item: item,
+                                token: token,
+                                userAgent: userAgent
+                            )
                         } label: {
                             HStack(alignment: .center, spacing: 12) {
                                 artwork(for: item)
