@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct ContentView: View {
+struct ArtistsSearchView: View {
     private let token = "gMBGYHrUBKsPAJRDmMTbGCLgHlJrdHbMxlCGOqSM"
     private let userAgent = "DiscogsClient/1.0"
 
@@ -16,17 +16,11 @@ struct ContentView: View {
     @State private var isLoading = false
     @State private var errorMessage: String?
     @State private var hasSearched = false
+    @State private var selectedArtist: DiscogsSearchResult?
 
     var body: some View {
         NavigationStack {
             VStack {
-                if let errorMessage {
-                    Text(errorMessage)
-                        .foregroundStyle(.red)
-                        .font(.footnote)
-                        .padding(.horizontal)
-                }
-
                 if isLoading, results.isEmpty {
                     Spacer()
                     ProgressView()
@@ -50,29 +44,17 @@ struct ContentView: View {
                     Spacer()
                 } else {
                     List(results) { item in
-                        NavigationLink {
-                            DiscogsArtistDetailView(
-                                item: item,
-                                token: token,
-                                userAgent: userAgent
-                            )
+                        Button {
+                            selectedArtist = item
                         } label: {
                             HStack(alignment: .center, spacing: 12) {
                                 artwork(for: item)
                                     .frame(width: 64, height: 64)
                                     .clipShape(RoundedRectangle(cornerRadius: 10))
 
-                                VStack(alignment: .leading, spacing: 6) {
-                                    Text(item.title)
-                                        .font(.headline)
-                                        .lineLimit(2)
-
-                                    Text([item.type?.capitalized, item.country, item.year.map(String.init)]
-                                        .compactMap { $0 }
-                                        .joined(separator: " • "))
-                                    .font(.caption)
-                                    .foregroundStyle(.secondary)
-                                }
+                                Text(item.title)
+                                    .font(.headline)
+                                    .lineLimit(2)
 
                                 Spacer(minLength: 0)
                             }
@@ -85,8 +67,17 @@ struct ContentView: View {
             .navigationBarTitleDisplayMode(.inline)
             .searchable(
                 text: $searchText,
-                prompt: "Search for artists..."
+                prompt: "Search for artists...",
             )
+            .sheet(item: $selectedArtist) { selected in
+                NavigationStack {
+                    DiscogsArtistDetailView(
+                        item: selected,
+                        token: token,
+                        userAgent: userAgent
+                    )
+                }
+            }
         }
         .task(id: searchText) {
             await debouncedSearch()
@@ -237,5 +228,5 @@ struct DiscogsSearchResult: Decodable, Identifiable {
 }
 
 #Preview {
-    ContentView()
+    ArtistsSearchView()
 }

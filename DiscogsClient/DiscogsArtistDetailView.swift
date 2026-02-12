@@ -12,92 +12,208 @@ struct DiscogsArtistDetailView: View {
     let token: String
     let userAgent: String
 
+    @Environment(\.dismiss) private var dismiss
     @State private var artist: DiscogsArtist?
     @State private var isLoadingArtist = false
     @State private var errorMessage: String?
+    @State private var isAlbumsPresented = false
 
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
-                artwork
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 280)
-                    .clipShape(RoundedRectangle(cornerRadius: 14))
+                heroSection
 
-                VStack(alignment: .leading, spacing: 12) {
+                VStack(alignment: .leading, spacing: 10) {
                     DetailRow(label: "Real Name", value: artist?.realname)
-                    DetailRow(label: "Type", value: item.type?.capitalized)
+                    DetailRow(label: "Type", value: displayType)
                     DetailRow(label: "Country", value: item.country)
                     DetailRow(label: "Year", value: item.year.map(String.init))
                     DetailRow(label: "Discogs ID", value: String(item.id))
-                    
-                    NavigationLink {
-                        DiscogsArtistAlbumsView(
-                            artistID: item.id,
-                            artistName: artist?.name ?? item.title,
-                            token: token,
-                            userAgent: userAgent
-                        )
-                    } label: {
-                        Label("See Albums", systemImage: "opticaldisc")
+                }
+                .padding(.horizontal, 20)
+
+                if !bandMembers.isEmpty || !profileText.isEmpty {
+                    Divider()
+                        .padding(.horizontal, 20)
+                }
+
+                if !bandMembers.isEmpty {
+                    VStack(alignment: .leading, spacing: 10) {
+                        Text("Members")
                             .font(.headline)
+
+                        ForEach(Array(bandMembers.enumerated()), id: \.element.id) { index, member in
+                            HStack(spacing: 10) {
+                                Image(systemName: "person.fill")
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                                Text(member.name)
+                                    .font(.body)
+                                if index == bandMembers.count - 1 {
+                                    Text("Past")
+                                        .font(.caption.weight(.semibold))
+                                        .foregroundStyle(.secondary)
+                                        .padding(.horizontal, 8)
+                                        .padding(.vertical, 3)
+                                        .background(.secondary.opacity(0.15), in: Capsule())
+                                }
+                                Spacer(minLength: 0)
+                            }
+                            .padding(.vertical, 4)
+                        }
                     }
-                    .padding(.top, 8)
+                    .padding(.horizontal, 20)
 
-                    if let profile = artist?.profile, !profile.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                        Text("Profile")
-                            .font(.headline)
-                            .padding(.top, 8)
-
-                        Text(cleanProfile(profile))
-                            .font(.body)
-                            .foregroundStyle(.secondary)
+                    if !profileText.isEmpty {
+                        Divider()
+                            .padding(.horizontal, 20)
                     }
                 }
 
-                if isLoadingArtist {
-                    HStack(spacing: 10) {
-                        ProgressView()
-                        Text("Loading artist details...")
-                            .font(.footnote)
+                if !profileText.isEmpty {
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Profile")
+                            .font(.headline)
+
+                        Text(profileText)
+                            .font(.body)
                             .foregroundStyle(.secondary)
                     }
+                    .padding(.horizontal, 20)
                 }
 
                 if let errorMessage {
                     Text(errorMessage)
                         .font(.footnote)
                         .foregroundStyle(.red)
+                        .padding(.horizontal, 20)
                 }
             }
-            .padding()
+            .frame(maxWidth: .infinity, alignment: .leading)
         }
-        .navigationTitle(artist?.name ?? item.title)
-        .navigationBarTitleDisplayMode(.large)
+        .navigationTitle("")
+        .navigationBarTitleDisplayMode(.inline)
         .task(id: item.id) {
             await fetchArtistDetails()
         }
+        .sheet(isPresented: $isAlbumsPresented) {
+            NavigationStack {
+                DiscogsArtistAlbumsView(
+                    artistID: item.id,
+                    token: token,
+                    userAgent: userAgent
+                )
+                .navigationTitle("Albums")
+                .navigationBarTitleDisplayMode(.inline)
+                .toolbar {
+                    ToolbarItem(placement: .topBarTrailing) {
+                        Button {
+                            isAlbumsPresented = false
+                        } label: {
+                            Image(systemName: "xmark")
+                                .foregroundStyle(.white)
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private var heroSection: some View {
+        ZStack(alignment: .bottomLeading) {
+            artwork
+                .background(Color.gray.opacity(0.15))
+                .clipped()
+
+            LinearGradient(
+                colors: [.clear, .black.opacity(0.7)],
+                startPoint: .top,
+                endPoint: .bottom
+            )
+            .allowsHitTesting(false)
+
+            heroOverlayContent
+                .padding(.horizontal, 16)
+                .padding(.bottom, 16)
+        }
+        .overlay(alignment: .topTrailing) {
+            Button {
+                dismiss()
+            } label: {
+                Image(systemName: "xmark")
+                    .font(.system(size: 13, weight: .semibold))
+                    .frame(width: 34, height: 34)
+                    .foregroundStyle(.white)
+                    .background(.black.opacity(0.45), in: Circle())
+                    .overlay(
+                        Circle()
+                            .stroke(.white.opacity(0.35), lineWidth: 0.8)
+                    )
+            }
+            .padding(12)
+        }
+        .clipShape(
+            UnevenRoundedRectangle(
+                topLeadingRadius: 24,
+                bottomLeadingRadius: 0,
+                bottomTrailingRadius: 0,
+                topTrailingRadius: 24,
+                style: .continuous
+            )
+        )
+    }
+
+    private var heroOverlayContent: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text(displayName)
+                .font(.largeTitle)
+                .fontWeight(.heavy)
+                .foregroundStyle(.white)
+                .lineLimit(2)
+
+            if !profilePreview.isEmpty {
+                Text(profilePreview)
+                    .font(.subheadline)
+                    .foregroundStyle(.white.opacity(0.9))
+                    .lineLimit(2)
+            }
+
+            Text(displayType)
+                .font(.caption)
+                .foregroundStyle(.white.opacity(0.78))
+
+            HStack(spacing: 10) {
+                Button {
+                    isAlbumsPresented = true
+                } label: {
+                    Label("Albums", systemImage: "opticaldisc")
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(.white)
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 14)
+                        .background(.white.opacity(0.16), in: Capsule())
+                }
+            }
+        }
+        .padding(.top, 16)
     }
 
     @ViewBuilder
     private var artwork: some View {
         if let artworkURL = artist?.primaryImageURL ?? item.thumbnailURL {
             AsyncImage(url: artworkURL) { phase in
-                switch phase {
-                case .empty:
+                if let image = phase.image {
+                    image
+                        .resizable()
+                        .scaledToFill()
+                } else if phase.error != nil {
+                    fallbackArtwork
+                } else {
                     ZStack {
                         RoundedRectangle(cornerRadius: 14)
                             .fill(Color.gray.opacity(0.15))
                         ProgressView()
                     }
-                case .success(let image):
-                    image
-                        .resizable()
-                        .scaledToFill()
-                case .failure:
-                    fallbackArtwork
-                @unknown default:
-                    fallbackArtwork
                 }
             }
         } else {
@@ -112,7 +228,37 @@ struct DiscogsArtistDetailView: View {
             Image(systemName: "person.crop.circle.badge.exclamationmark")
                 .font(.system(size: 58, weight: .light))
                 .foregroundStyle(.secondary)
+                .frame(height: 256)
         }
+    }
+
+    private var displayName: String {
+        artist?.name ?? item.title
+    }
+
+    private var profileText: String {
+        guard let profile = artist?.profile else { return "" }
+        return cleanProfile(profile)
+    }
+
+    private var profilePreview: String {
+        guard !profileText.isEmpty else { return "" }
+        let maxLength = 140
+        if profileText.count <= maxLength {
+            return profileText
+        }
+
+        let end = profileText.index(profileText.startIndex, offsetBy: maxLength)
+        return String(profileText[..<end]).trimmingCharacters(in: .whitespacesAndNewlines) + "..."
+    }
+
+    private var displayType: String {
+        bandMembers.isEmpty ? (item.type?.capitalized ?? "Artist") : "Band"
+    }
+
+    private var bandMembers: [DiscogsArtistMember] {
+        guard let members = artist?.members else { return [] }
+        return members.filter { !$0.name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }
     }
 
     private func fetchArtistDetails() async {
@@ -179,16 +325,17 @@ struct DiscogsArtist: Decodable {
     let realname: String?
     let profile: String?
     let images: [DiscogsArtistImage]?
+    let members: [DiscogsArtistMember]?
 
     var primaryImageURL: URL? {
         guard let images else { return nil }
-        
+
         let preferred = images.first(where: { $0.type == "primary" }) ?? images.first
-        
+
         if let uri = preferred?.uri, !uri.isEmpty {
             return URL(string: uri)
         }
-        
+
         return nil
     }
 }
@@ -196,4 +343,10 @@ struct DiscogsArtist: Decodable {
 struct DiscogsArtistImage: Decodable {
     let type: String?
     let uri: String?
+}
+
+struct DiscogsArtistMember: Decodable, Identifiable {
+    let id: Int
+    let name: String
+    let active: Bool?
 }

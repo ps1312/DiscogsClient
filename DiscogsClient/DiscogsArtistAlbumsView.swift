@@ -9,7 +9,6 @@ import SwiftUI
 
 struct DiscogsArtistAlbumsView: View {
     let artistID: Int
-    let artistName: String
     let token: String
     let userAgent: String
 
@@ -35,10 +34,6 @@ struct DiscogsArtistAlbumsView: View {
                 }
             } else {
                 VStack(alignment: .leading, spacing: 12) {
-                    Text(artistName)
-                        .font(.headline)
-                        .padding(.horizontal)
-
                     List(albums) { release in
                         HStack(spacing: 12) {
                             albumArtwork(for: release)
@@ -56,12 +51,10 @@ struct DiscogsArtistAlbumsView: View {
                         }
                         .padding(.vertical, 4)
                     }
-                    .listStyle(.plain)
+                    .listRowSeparator(.hidden)
                 }
             }
         }
-        .navigationTitle("Albums")
-        .navigationBarTitleDisplayMode(.inline)
         .task(id: artistID) {
             await fetchAlbums()
         }
