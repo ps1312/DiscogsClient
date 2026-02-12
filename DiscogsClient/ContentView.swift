@@ -15,21 +15,11 @@ struct ContentView: View {
     @State private var results: [DiscogsSearchResult] = []
     @State private var isLoading = false
     @State private var errorMessage: String?
+    @State private var hasSearched = false
 
     var body: some View {
         NavigationStack {
             VStack {
-                TextField("Search Discogs", text: $searchText)
-                    .textFieldStyle(.roundedBorder)
-                    .autocorrectionDisabled()
-                    .textInputAutocapitalization(.never)
-                    .padding(.horizontal)
-                    .padding(.top, 8)
-
-                if isLoading {
-                    ProgressView()
-                }
-
                 if let errorMessage {
                     Text(errorMessage)
                         .foregroundStyle(.red)
@@ -37,37 +27,62 @@ struct ContentView: View {
                         .padding(.horizontal)
                 }
 
-                List(results) { item in
-                    NavigationLink {
-                        DiscogsArtistDetailView(item: item)
-                    } label: {
-                        HStack(alignment: .top, spacing: 12) {
-                            artwork(for: item)
-                                .frame(width: 64, height: 64)
-                                .clipShape(RoundedRectangle(cornerRadius: 10))
+                if isLoading, results.isEmpty {
+                    Spacer()
+                    ProgressView()
+                    Spacer()
+                } else if results.isEmpty, !isLoading, errorMessage == nil {
+                    Spacer()
+                    VStack(spacing: 10) {
+                        Image(systemName: "magnifyingglass")
+                            .font(.system(size: 44, weight: .light))
+                            .foregroundStyle(.secondary)
 
-                            VStack(alignment: .leading, spacing: 6) {
-                                Text(item.title)
-                                    .font(.headline)
-                                    .lineLimit(2)
+                        Text(emptyStateTitle)
+                            .font(.title3.weight(.semibold))
 
-                                Text([item.type?.capitalized, item.country, item.year.map(String.init)]
-                                    .compactMap { $0 }
-                                    .joined(separator: " • "))
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
-                            }
-
-                            Spacer(minLength: 0)
-                        }
-                        .padding(.vertical, 6)
+                        Text(emptyStateMessage)
+                            .font(.body)
+                            .foregroundStyle(.secondary)
+                            .multilineTextAlignment(.center)
                     }
-                    .listRowSeparator(.hidden)
-                    .buttonStyle(.plain)
+                    .padding(.horizontal, 24)
+                    Spacer()
+                } else {
+                    List(results) { item in
+                        NavigationLink {
+                            DiscogsArtistDetailView(item: item)
+                        } label: {
+                            HStack(alignment: .center, spacing: 12) {
+                                artwork(for: item)
+                                    .frame(width: 64, height: 64)
+                                    .clipShape(RoundedRectangle(cornerRadius: 10))
+
+                                VStack(alignment: .leading, spacing: 6) {
+                                    Text(item.title)
+                                        .font(.headline)
+                                        .lineLimit(2)
+
+                                    Text([item.type?.capitalized, item.country, item.year.map(String.init)]
+                                        .compactMap { $0 }
+                                        .joined(separator: " • "))
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                                }
+
+                                Spacer(minLength: 0)
+                            }
+                        }
+                        .buttonStyle(.plain)
+                    }
                 }
-                .listStyle(.plain)
             }
-            .navigationTitle("Discogs Search")
+            .navigationTitle("Discogs")
+            .navigationBarTitleDisplayMode(.inline)
+            .searchable(
+                text: $searchText,
+                prompt: "Search for artists..."
+            )
         }
         .task(id: searchText) {
             await debouncedSearch()
@@ -76,29 +91,25 @@ struct ContentView: View {
 
     @ViewBuilder
     private func artwork(for item: DiscogsSearchResult) -> some View {
-        AsyncImage(url: item.thumbnailURL) { phase in
-            switch phase {
-            case .empty:
-                ZStack {
-                    RoundedRectangle(cornerRadius: 10)
-                        .fill(Color.gray.opacity(0.15))
-                    ProgressView()
+        if let thumbnailURL = item.thumbnailURL {
+            AsyncImage(url: thumbnailURL) { phase in
+                if let image = phase.image {
+                    image.resizable().scaledToFill()
+                } else if phase.error != nil {
+                    fallbackArtworkIcon
+                } else {
+                    fallbackArtworkIcon
                 }
-            case .success(let image):
-                image
-                    .resizable()
-                    .scaledToFill()
-            case .failure:
-                ZStack {
-                    RoundedRectangle(cornerRadius: 10)
-                        .fill(Color.gray.opacity(0.15))
-                    Image(systemName: "music.note")
-                        .foregroundStyle(.secondary)
-                }
-            @unknown default:
-                EmptyView()
             }
+        } else {
+            fallbackArtworkIcon
         }
+    }
+
+    private var fallbackArtworkIcon: some View {
+        Image(systemName: "person.crop.circle.badge.exclamationmark")
+            .font(.system(size: 28, weight: .light))
+            .foregroundStyle(.secondary)
     }
 
     private func debouncedSearch() async {
@@ -106,11 +117,18 @@ struct ContentView: View {
         
         guard !query.isEmpty else {
             await MainActor.run {
+                hasSearched = false
                 results = []
                 errorMessage = nil
                 isLoading = false
             }
             return
+        }
+
+        await MainActor.run {
+            isLoading = true
+            errorMessage = nil
+            results = []
         }
 
         do {
@@ -124,6 +142,7 @@ struct ContentView: View {
 
     private func fetchDiscogsSearch(query: String) async {
         await MainActor.run {
+            hasSearched = true
             isLoading = true
             errorMessage = nil
         }
@@ -164,6 +183,34 @@ struct ContentView: View {
                 errorMessage = error.localizedDescription
             }
         }
+    }
+
+    private var trimmedSearchText: String {
+        searchText.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
+    private var emptyStateTitle: String {
+        if !hasSearched {
+            return "Start Searching"
+        }
+
+        if !trimmedSearchText.isEmpty {
+            return "No Results"
+        }
+
+        return "No Recent Searches"
+    }
+
+    private var emptyStateMessage: String {
+        if !hasSearched {
+            return "Find artists on Discogs"
+        }
+
+        if !trimmedSearchText.isEmpty {
+            return "No matches found for \"\(trimmedSearchText)\""
+        }
+
+        return "Your recent searches will appear here"
     }
 }
 
