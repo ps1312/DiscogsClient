@@ -17,49 +17,57 @@ struct ContentView: View {
     @State private var errorMessage: String?
 
     var body: some View {
-        VStack {
-            TextField("Search Discogs", text: $searchText)
-                .textFieldStyle(.roundedBorder)
-                .autocorrectionDisabled()
-                .textInputAutocapitalization(.never)
-                .padding(.horizontal)
-                .padding(.top, 8)
-
-            if isLoading {
-                ProgressView()
-            }
-
-            if let errorMessage {
-                Text(errorMessage)
-                    .foregroundStyle(.red)
-                    .font(.footnote)
+        NavigationStack {
+            VStack {
+                TextField("Search Discogs", text: $searchText)
+                    .textFieldStyle(.roundedBorder)
+                    .autocorrectionDisabled()
+                    .textInputAutocapitalization(.never)
                     .padding(.horizontal)
-            }
+                    .padding(.top, 8)
 
-            List(results) { item in
-                HStack(alignment: .top, spacing: 12) {
-                    artwork(for: item)
-                        .frame(width: 64, height: 64)
-                        .clipShape(RoundedRectangle(cornerRadius: 10))
-
-                    VStack(alignment: .leading, spacing: 6) {
-                        Text(item.title)
-                            .font(.headline)
-                            .lineLimit(2)
-
-                        Text([item.type?.capitalized, item.country, item.year.map(String.init)]
-                            .compactMap { $0 }
-                            .joined(separator: " • "))
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                    }
-
-                    Spacer(minLength: 0)
+                if isLoading {
+                    ProgressView()
                 }
-                .padding(.vertical, 6)
-                .listRowSeparator(.hidden)
+
+                if let errorMessage {
+                    Text(errorMessage)
+                        .foregroundStyle(.red)
+                        .font(.footnote)
+                        .padding(.horizontal)
+                }
+
+                List(results) { item in
+                    NavigationLink {
+                        DiscogsArtistDetailView(item: item)
+                    } label: {
+                        HStack(alignment: .top, spacing: 12) {
+                            artwork(for: item)
+                                .frame(width: 64, height: 64)
+                                .clipShape(RoundedRectangle(cornerRadius: 10))
+
+                            VStack(alignment: .leading, spacing: 6) {
+                                Text(item.title)
+                                    .font(.headline)
+                                    .lineLimit(2)
+
+                                Text([item.type?.capitalized, item.country, item.year.map(String.init)]
+                                    .compactMap { $0 }
+                                    .joined(separator: " • "))
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                            }
+
+                            Spacer(minLength: 0)
+                        }
+                        .padding(.vertical, 6)
+                    }
+                    .listRowSeparator(.hidden)
+                    .buttonStyle(.plain)
+                }
+                .listStyle(.plain)
             }
-            .listStyle(.plain)
+            .navigationTitle("Discogs Search")
         }
         .task(id: searchText) {
             await debouncedSearch()
@@ -163,7 +171,7 @@ private struct DiscogsSearchResponse: Decodable {
     let results: [DiscogsSearchResult]
 }
 
-private struct DiscogsSearchResult: Decodable, Identifiable {
+struct DiscogsSearchResult: Decodable, Identifiable {
     let id: Int
     let title: String
     let type: String?
