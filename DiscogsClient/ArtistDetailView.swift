@@ -1,78 +1,76 @@
-//
-//  DiscogsArtistDetailView.swift
-//  DiscogsClient
-//
-//  Created by Codex on 12/02/26.
-//
-
 import SwiftUI
 
 struct ArtistDetailView: View {
     let client: HTTPClient
-    let item: DiscogsArtistSearchResult
-    let token: String
-    let userAgent: String
+    static let token = "gMBGYHrUBKsPAJRDmMTbGCLgHlJrdHbMxlCGOqSM"
+    static let userAgent = "DiscogsClient/1.0"
 
+    @State private var item: Artist
     @State private var artist: DiscogsArtist?
     @State private var isLoadingArtist = false
     @State private var errorMessage: String?
+    
+    init(client: HTTPClient,item: Artist) {
+        self.client = client
+        _item = State(initialValue: item)
+    }
 
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
-                heroSection
+                artwork
+                    .clipped()
 
                 VStack(alignment: .leading, spacing: 10) {
-                    DetailRow(label: "Real Name", value: artist?.realname)
-                    DetailRow(label: "Type", value: displayType)
                     DetailRow(label: "Discogs ID", value: String(item.id))
+                    DetailRow(label: "Type", value: "Artist")
                 }
                 .padding(.horizontal, 20)
 
-                if !bandMembers.isEmpty || !profileText.isEmpty {
-                    Divider()
-                        .padding(.horizontal, 20)
-                }
-
-                if !bandMembers.isEmpty {
-                    VStack(alignment: .leading, spacing: 10) {
-                        Text("Members")
-                            .font(.headline)
-
-                        ForEach(Array(bandMembers.enumerated()), id: \.element.id) { index, member in
-                            HStack(spacing: 10) {
-                                Image(systemName: "person.fill")
-                                    .font(.caption)
-                                    .foregroundStyle(.secondary)
-                                Text(member.name)
-                                    .font(.body)
-                                if index == bandMembers.count - 1 {
-                                    Text("Past")
-                                        .font(.caption.weight(.semibold))
-                                        .foregroundStyle(.secondary)
-                                        .padding(.horizontal, 8)
-                                        .padding(.vertical, 3)
-                                        .background(.secondary.opacity(0.15), in: Capsule())
-                                }
-                                Spacer(minLength: 0)
-                            }
-                            .padding(.vertical, 4)
-                        }
-                    }
-                    .padding(.horizontal, 20)
-
-                    if !profileText.isEmpty {
-                        Divider()
-                            .padding(.horizontal, 20)
-                    }
-                }
-
-                if !profileText.isEmpty {
+//                if !bandMembers.isEmpty || !profileText.isEmpty {
+//                    Divider()
+//                        .padding(.horizontal, 20)
+//                }
+//
+//                if !bandMembers.isEmpty {
+//                    VStack(alignment: .leading, spacing: 10) {
+//                        Text("Members")
+//                            .font(.headline)
+//
+//                        ForEach(Array(bandMembers.enumerated()), id: \.element.id) { index, member in
+//                            HStack(spacing: 10) {
+//                                Image(systemName: "person.fill")
+//                                    .font(.caption)
+//                                    .foregroundStyle(.secondary)
+//                                Text(member.name)
+//                                    .font(.body)
+//                                if index == bandMembers.count - 1 {
+//                                    Text("Past")
+//                                        .font(.caption.weight(.semibold))
+//                                        .foregroundStyle(.secondary)
+//                                        .padding(.horizontal, 8)
+//                                        .padding(.vertical, 3)
+//                                        .background(.secondary.opacity(0.15), in: Capsule())
+//                                }
+//                                Spacer(minLength: 0)
+//                            }
+//                            .padding(.vertical, 4)
+//                        }
+//                    }
+//                    .padding(.horizontal, 20)
+//
+//                    if !profileText.isEmpty {
+//                        Divider()
+//                            .padding(.horizontal, 20)
+//                    }
+//                }
+                
+                if let profile = item.profile {
                     VStack(alignment: .leading, spacing: 8) {
                         Text("Profile")
                             .font(.headline)
 
-                        Text(profileText)
+                        Text(profile)
                             .font(.body)
                             .foregroundStyle(.secondary)
                     }
@@ -89,74 +87,16 @@ struct ArtistDetailView: View {
             .frame(maxWidth: .infinity, alignment: .leading)
         }
         .background(Color.black)
-        .navigationTitle(displayName)
+        .navigationTitle(item.title)
         .navigationBarTitleDisplayMode(.large)
         .task(id: item.id) {
             await fetchArtistDetails()
         }
     }
 
-    private var heroSection: some View {
-        ZStack(alignment: .bottomLeading) {
-            artwork
-                .background(Color.gray.opacity(0.15))
-                .clipped()
-
-            LinearGradient(
-                colors: [.clear, .black.opacity(0.7)],
-                startPoint: .top,
-                endPoint: .bottom
-            )
-            .allowsHitTesting(false)
-
-            heroOverlayContent
-                .padding(.horizontal, 16)
-                .padding(.bottom, 16)
-        }
-        .clipShape(RoundedRectangle(cornerRadius: 24))
-        .padding(.horizontal, 8)
-    }
-
-    private var heroOverlayContent: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            if !profilePreview.isEmpty {
-                Text(profilePreview)
-                    .font(.subheadline)
-                    .foregroundStyle(.white.opacity(0.9))
-                    .lineLimit(2)
-            }
-
-            Text(displayType)
-                .font(.caption)
-                .foregroundStyle(.white.opacity(0.78))
-
-            HStack(spacing: 10) {
-                NavigationLink {
-                    ArtistAlbumsView(
-                        client: client,
-                        artistID: item.id,
-                        token: token,
-                        userAgent: userAgent
-                    )
-                    .navigationTitle("Albums")
-                    .navigationBarTitleDisplayMode(.inline)
-                } label: {
-                    Label("Albums", systemImage: "opticaldisc")
-                        .font(.subheadline.weight(.semibold))
-                        .foregroundStyle(.white)
-                        .padding(.horizontal, 16)
-                        .padding(.vertical, 14)
-                        .background(.white.opacity(0.16), in: Capsule())
-                }
-                .buttonStyle(.plain)
-            }
-        }
-        .padding(.top, 16)
-    }
-
     @ViewBuilder
     private var artwork: some View {
-        if let artworkURL = artist?.primaryImageURL ?? item.thumbnailURL {
+        if let artworkURL = item.imageUrl ?? item.thumbUrl {
             AsyncImage(url: artworkURL) { phase in
                 if let image = phase.image {
                     image
@@ -225,14 +165,21 @@ struct ArtistDetailView: View {
 
         var request = URLRequest(url: URL(string: "https://api.discogs.com/artists/\(item.id)")!)
         request.httpMethod = "GET"
-        request.setValue("Discogs token=\(token)", forHTTPHeaderField: "Authorization")
-        request.setValue(userAgent, forHTTPHeaderField: "User-Agent")
+        request.setValue("Discogs token=\(Self.token)", forHTTPHeaderField: "Authorization")
+        request.setValue(Self.userAgent, forHTTPHeaderField: "User-Agent")
 
         do {
             let (data, _) = try await client.send(request)
             let decoded = try JSONDecoder().decode(DiscogsArtist.self, from: data)
+            
             await MainActor.run {
-                artist = decoded
+                item = Artist(
+                    id: decoded.id,
+                    title: item.title,
+                    thumbUrl: item.thumbUrl,
+                    imageUrl: decoded.primaryImageURL,
+                    profile: decoded.profile
+                )
                 isLoadingArtist = false
             }
         } catch {
@@ -270,7 +217,6 @@ private struct DetailRow: View {
 struct DiscogsArtist: Decodable {
     let id: Int
     let name: String
-    let realname: String?
     let profile: String?
     let images: [DiscogsArtistImage]?
     let members: [DiscogsArtistMember]?

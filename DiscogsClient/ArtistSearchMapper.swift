@@ -1,34 +1,41 @@
 import Foundation
 
-struct DiscogsArtistSearchResult: Decodable, Identifiable {
-    let id: Int
-    let title: String
-    let type: String
-    let thumb: String?
-
-    var thumbnailURL: URL? {
-        guard let thumb, !thumb.isEmpty else { return nil }
-        return URL(string: thumb)
-    }
-}
-
 class ArtistSearchMapper {
-    struct PageMetadata: Decodable {
+    private struct DiscogsArtistSearchResult: Decodable, Identifiable {
+        let id: Int
+        let title: String
+        let type: String
+        let thumb: String?
+
+        var thumbnailURL: URL? {
+            guard let thumb, !thumb.isEmpty else { return nil }
+            return URL(string: thumb)
+        }
+    }
+    
+    private struct PageMetadata: Decodable {
         let page: Int
         let pages: Int
         let per_page: Int
         let items: Int
     }
     
-    struct Root: Decodable {
+    private struct Root: Decodable {
         let pagination: PageMetadata
         let results: [DiscogsArtistSearchResult]
     }
     
     static func map(_ data: Data, _ response: HTTPURLResponse) throws -> [Artist] {
         let decoded = try JSONDecoder().decode(Root.self, from: data)
-        return decoded.results.map {
-            Artist(id: $0.id, title: $0.title, thumbUrl: $0.thumbnailURL)
+        let models = decoded.results.map {
+            Artist(
+                id: $0.id,
+                title: $0.title,
+                thumbUrl: $0.thumbnailURL,
+                imageUrl: nil,
+                profile: nil
+            )
         }
+        return models
     }
 }
