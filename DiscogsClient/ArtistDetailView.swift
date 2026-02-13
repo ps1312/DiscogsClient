@@ -2,8 +2,6 @@ import SwiftUI
 
 struct ArtistDetailView: View {
     let client: HTTPClient
-    static let token = "gMBGYHrUBKsPAJRDmMTbGCLgHlJrdHbMxlCGOqSM"
-    static let userAgent = "DiscogsClient/1.0"
 
     @State private var item: Artist
     @State private var artist: DiscogsArtist?
@@ -162,24 +160,14 @@ struct ArtistDetailView: View {
             isLoadingArtist = true
             errorMessage = nil
         }
-
-        var request = URLRequest(url: URL(string: "https://api.discogs.com/artists/\(item.id)")!)
-        request.httpMethod = "GET"
-        request.setValue("Discogs token=\(Self.token)", forHTTPHeaderField: "Authorization")
-        request.setValue(Self.userAgent, forHTTPHeaderField: "User-Agent")
-
+        
         do {
-            let (data, _) = try await client.send(request)
-            let decoded = try JSONDecoder().decode(DiscogsArtist.self, from: data)
-            
+            let request = ArtistDetailsRequest.create(artistId: item.id)
+            let (data, response) = try await client.send(request)
+            let artist = try ArtistDetailMapper.map(data, response, preserving: item)
+
             await MainActor.run {
-                item = Artist(
-                    id: decoded.id,
-                    title: item.title,
-                    thumbUrl: item.thumbUrl,
-                    imageUrl: decoded.primaryImageURL,
-                    profile: decoded.profile
-                )
+                item = artist
                 isLoadingArtist = false
             }
         } catch {
