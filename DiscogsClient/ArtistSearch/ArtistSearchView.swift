@@ -2,9 +2,6 @@ import SwiftUI
 
 struct ArtistSearchView: View {
     private let client: HTTPClient
-    
-    private let token = "gMBGYHrUBKsPAJRDmMTbGCLgHlJrdHbMxlCGOqSM"
-    private let userAgent = "DiscogsClient/1.0"
 
     @State private var searchText = "Red hot"
     @State private var results: [Artist] = []
@@ -46,7 +43,7 @@ struct ArtistSearchView: View {
                             ArtistDetailView(client: client, item: item)
                         } label: {
                             HStack(alignment: .center, spacing: 12) {
-                                artwork(for: item.thumbUrl)
+                                AsyncImageWithFallback(url: item.thumbUrl)
                                     .frame(width: 64, height: 64)
                                     .clipShape(RoundedRectangle(cornerRadius: 10))
 
@@ -69,23 +66,6 @@ struct ArtistSearchView: View {
         }
         .task(id: searchText) {
             await debouncedSearch()
-        }
-    }
-
-    @ViewBuilder
-    private func artwork(for thumbUrl: URL?) -> some View {
-        if let thumbUrl {
-            AsyncImage(url: thumbUrl) { phase in
-                if let image = phase.image {
-                    image.resizable().scaledToFill()
-                } else if phase.error != nil {
-                    fallbackArtworkIcon
-                } else {
-                    fallbackArtworkIcon
-                }
-            }
-        } else {
-            fallbackArtworkIcon
         }
     }
 

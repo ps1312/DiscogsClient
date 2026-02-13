@@ -16,7 +16,7 @@ struct ArtistDetailView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
-                artwork
+                AsyncImageWithFallback(url: item.imageUrl ?? item.thumbUrl)
                     .clipShape(RoundedRectangle(cornerRadius: 12))
                     .clipped()
 
@@ -98,40 +98,6 @@ struct ArtistDetailView: View {
         }
     }
 
-    @ViewBuilder
-    private var artwork: some View {
-        if let artworkURL = item.imageUrl ?? item.thumbUrl {
-            AsyncImage(url: artworkURL) { phase in
-                if let image = phase.image {
-                    image
-                        .resizable()
-                        .scaledToFill()
-                } else if phase.error != nil {
-                    fallbackArtwork
-                } else {
-                    ZStack {
-                        RoundedRectangle(cornerRadius: 14)
-                            .fill(Color.gray.opacity(0.15))
-                        ProgressView()
-                    }
-                }
-            }
-        } else {
-            fallbackArtwork
-        }
-    }
-
-    private var fallbackArtwork: some View {
-        ZStack {
-            RoundedRectangle(cornerRadius: 14)
-                .fill(Color.gray.opacity(0.15))
-            Image(systemName: "person.crop.circle.badge.exclamationmark")
-                .font(.system(size: 58, weight: .light))
-                .foregroundStyle(.secondary)
-                .frame(height: 256)
-        }
-    }
-
     private var displayType: String {
         bandMembers.isEmpty ? "Artist" : "Band"
     }
@@ -162,13 +128,6 @@ struct ArtistDetailView: View {
                 errorMessage = "Failed to load artist details: \(error.localizedDescription)"
             }
         }
-    }
-
-    private func cleanProfile(_ text: String) -> String {
-        text
-            .replacingOccurrences(of: "\\[(a|r|m|l)=\\d+\\]", with: "", options: .regularExpression)
-            .replacingOccurrences(of: "\n\n", with: "\n")
-            .trimmingCharacters(in: .whitespacesAndNewlines)
     }
 }
 

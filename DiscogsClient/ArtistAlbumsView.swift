@@ -62,7 +62,7 @@ struct ArtistAlbumsView: View {
 
                     List(filteredAlbums) { release in
                         HStack(spacing: 12) {
-                            albumArtwork(for: release)
+                            AsyncImageWithFallback(url: release.thumbnailURL)
                                 .frame(width: 54, height: 54)
                                 .clipShape(RoundedRectangle(cornerRadius: 8))
 
