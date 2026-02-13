@@ -12,7 +12,7 @@ struct ArtistSearchView: View {
     @State private var errorMessage: String?
     @State private var hasSearched = false
     
-    init(httpClient: HTTPClient = URLSession.shared) {
+    init(httpClient: HTTPClient) {
         self.client = httpClient
     }
 
@@ -186,5 +186,5 @@ struct ArtistSearchView: View {
 }
 
 #Preview {
-    ArtistSearchView()
+    ArtistSearchView(httpClient: URLSession.shared)
 }

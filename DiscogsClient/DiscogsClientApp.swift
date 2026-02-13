@@ -11,7 +11,7 @@ import SwiftUI
 struct DiscogsClientApp: App {
     var body: some Scene {
         WindowGroup {
-            ArtistSearchView()
+            ArtistSearchView(httpClient: URLSession.shared)
         }
     }
 }
