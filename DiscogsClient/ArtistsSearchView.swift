@@ -11,12 +11,11 @@ struct ArtistsSearchView: View {
     private let token = "gMBGYHrUBKsPAJRDmMTbGCLgHlJrdHbMxlCGOqSM"
     private let userAgent = "DiscogsClient/1.0"
 
-    @State private var searchText = "Nirvana"
+    @State private var searchText = ""
     @State private var results: [DiscogsSearchResult] = []
     @State private var isLoading = false
     @State private var errorMessage: String?
     @State private var hasSearched = false
-    @State private var selectedArtist: DiscogsSearchResult?
 
     var body: some View {
         NavigationStack {
@@ -44,8 +43,12 @@ struct ArtistsSearchView: View {
                     Spacer()
                 } else {
                     List(results) { item in
-                        Button {
-                            selectedArtist = item
+                        NavigationLink {
+                            ArtistDetailView(
+                                item: item,
+                                token: token,
+                                userAgent: userAgent
+                            )
                         } label: {
                             HStack(alignment: .center, spacing: 12) {
                                 artwork(for: item)
@@ -59,7 +62,6 @@ struct ArtistsSearchView: View {
                                 Spacer(minLength: 0)
                             }
                         }
-                        .buttonStyle(.plain)
                     }
                 }
             }
@@ -69,15 +71,6 @@ struct ArtistsSearchView: View {
                 text: $searchText,
                 prompt: "Search for artists...",
             )
-            .sheet(item: $selectedArtist) { selected in
-                NavigationStack {
-                    DiscogsArtistDetailView(
-                        item: selected,
-                        token: token,
-                        userAgent: userAgent
-                    )
-                }
-            }
         }
         .task(id: searchText) {
             await debouncedSearch()

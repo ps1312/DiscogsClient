@@ -7,16 +7,14 @@
 
 import SwiftUI
 
-struct DiscogsArtistDetailView: View {
+struct ArtistDetailView: View {
     let item: DiscogsSearchResult
     let token: String
     let userAgent: String
 
-    @Environment(\.dismiss) private var dismiss
     @State private var artist: DiscogsArtist?
     @State private var isLoadingArtist = false
     @State private var errorMessage: String?
-    @State private var isAlbumsPresented = false
 
     var body: some View {
         ScrollView {
@@ -91,31 +89,11 @@ struct DiscogsArtistDetailView: View {
             }
             .frame(maxWidth: .infinity, alignment: .leading)
         }
-        .navigationTitle("")
-        .navigationBarTitleDisplayMode(.inline)
+        .background(Color.black)
+        .navigationTitle(displayName)
+        .navigationBarTitleDisplayMode(.large)
         .task(id: item.id) {
             await fetchArtistDetails()
-        }
-        .sheet(isPresented: $isAlbumsPresented) {
-            NavigationStack {
-                DiscogsArtistAlbumsView(
-                    artistID: item.id,
-                    token: token,
-                    userAgent: userAgent
-                )
-                .navigationTitle("Albums")
-                .navigationBarTitleDisplayMode(.inline)
-                .toolbar {
-                    ToolbarItem(placement: .topBarTrailing) {
-                        Button {
-                            isAlbumsPresented = false
-                        } label: {
-                            Image(systemName: "xmark")
-                                .foregroundStyle(.white)
-                        }
-                    }
-                }
-            }
         }
     }
 
@@ -136,41 +114,12 @@ struct DiscogsArtistDetailView: View {
                 .padding(.horizontal, 16)
                 .padding(.bottom, 16)
         }
-        .overlay(alignment: .topTrailing) {
-            Button {
-                dismiss()
-            } label: {
-                Image(systemName: "xmark")
-                    .font(.system(size: 13, weight: .semibold))
-                    .frame(width: 34, height: 34)
-                    .foregroundStyle(.white)
-                    .background(.black.opacity(0.45), in: Circle())
-                    .overlay(
-                        Circle()
-                            .stroke(.white.opacity(0.35), lineWidth: 0.8)
-                    )
-            }
-            .padding(12)
-        }
-        .clipShape(
-            UnevenRoundedRectangle(
-                topLeadingRadius: 24,
-                bottomLeadingRadius: 0,
-                bottomTrailingRadius: 0,
-                topTrailingRadius: 24,
-                style: .continuous
-            )
-        )
+        .clipShape(RoundedRectangle(cornerRadius: 24))
+        .padding(.horizontal, 8)
     }
 
     private var heroOverlayContent: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text(displayName)
-                .font(.largeTitle)
-                .fontWeight(.heavy)
-                .foregroundStyle(.white)
-                .lineLimit(2)
-
             if !profilePreview.isEmpty {
                 Text(profilePreview)
                     .font(.subheadline)
@@ -183,8 +132,14 @@ struct DiscogsArtistDetailView: View {
                 .foregroundStyle(.white.opacity(0.78))
 
             HStack(spacing: 10) {
-                Button {
-                    isAlbumsPresented = true
+                NavigationLink {
+                    ArtistAlbumsView(
+                        artistID: item.id,
+                        token: token,
+                        userAgent: userAgent
+                    )
+                    .navigationTitle("Albums")
+                    .navigationBarTitleDisplayMode(.inline)
                 } label: {
                     Label("Albums", systemImage: "opticaldisc")
                         .font(.subheadline.weight(.semibold))
@@ -193,6 +148,7 @@ struct DiscogsArtistDetailView: View {
                         .padding(.vertical, 14)
                         .background(.white.opacity(0.16), in: Capsule())
                 }
+                .buttonStyle(.plain)
             }
         }
         .padding(.top, 16)
