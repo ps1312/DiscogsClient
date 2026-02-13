@@ -162,7 +162,7 @@ struct ArtistDetailView: View {
         }
         
         do {
-            let request = ArtistDetailsRequest.create(artistId: item.id)
+            let request = ApiRequestBuilder.details(for: item.id)
             let (data, response) = try await client.send(request)
             let artist = try ArtistDetailMapper.map(data, response, preserving: item)
 

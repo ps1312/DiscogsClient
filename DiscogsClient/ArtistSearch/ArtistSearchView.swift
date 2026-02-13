@@ -131,12 +131,8 @@ struct ArtistSearchView: View {
         }
 
         do {
-            let request = ArtistSearchRequest.create(
-                url: "https://api.discogs.com/database/search",
-                query: query
-            )
+            let request = ApiRequestBuilder.search(query: query)
             let (data, response) = try await client.send(request)
-            
             let artists = try ArtistSearchMapper.map(data, response)
             
             await MainActor.run {
