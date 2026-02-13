@@ -8,7 +8,7 @@ struct ArtistDetailView: View {
     @State private var isLoadingArtist = false
     @State private var errorMessage: String?
     
-    init(client: HTTPClient,item: Artist) {
+    init(client: HTTPClient, item: Artist) {
         self.client = client
         _item = State(initialValue: item)
     }
@@ -23,6 +23,19 @@ struct ArtistDetailView: View {
                     DetailRow(label: "Discogs ID", value: String(item.id))
                     DetailRow(label: "Type", value: "Artist")
                 }
+                .padding(.horizontal, 20)
+
+                NavigationLink {
+                    ArtistAlbumsView(client: client, artistID: item.id)
+                        .navigationTitle("Albums")
+                        .navigationBarTitleDisplayMode(.inline)
+                } label: {
+                    Label("View Albums", systemImage: "opticaldisc")
+                        .font(.subheadline.weight(.semibold))
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 10)
+                }
+                .buttonStyle(.borderedProminent)
                 .padding(.horizontal, 20)
 
 //                if !bandMembers.isEmpty || !profileText.isEmpty {

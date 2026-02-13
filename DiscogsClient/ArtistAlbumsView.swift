@@ -1,17 +1,8 @@
-//
-//  DiscogsArtistAlbumsView.swift
-//  DiscogsClient
-//
-//  Created by Codex on 12/02/26.
-//
-
 import SwiftUI
 
 struct ArtistAlbumsView: View {
     let client: HTTPClient
     let artistID: Int
-    let token: String
-    let userAgent: String
 
     @State private var albums: [DiscogsArtistRelease] = []
     @State private var isLoading = false
@@ -179,19 +170,8 @@ struct ArtistAlbumsView: View {
             albums = []
         }
         
-        var components = URLComponents(string: "https://api.discogs.com/artists/\(artistID)/releases")!
-        components.queryItems = [
-            URLQueryItem(name: "per_page", value: "100"),
-            URLQueryItem(name: "sort", value: "year"),
-            URLQueryItem(name: "sort_order", value: "desc")
-        ]
-
-        var request = URLRequest(url: components.url!)
-        request.httpMethod = "GET"
-        request.setValue("Discogs token=\(token)", forHTTPHeaderField: "Authorization")
-        request.setValue(userAgent, forHTTPHeaderField: "User-Agent")
-
         do {
+            let request = ApiRequestBuilder.artistReleases(for: artistID)
             let (data, _) = try await client.send(request)
 
             let decoded = try JSONDecoder().decode(DiscogsArtistReleasesResponse.self, from: data)
