@@ -38,21 +38,11 @@ struct ArtistSearchView: View {
                     .padding(.horizontal, 24)
                     Spacer()
                 } else {
-                    List(results) { item in
+                    List(results) { artist in
                         NavigationLink {
-                            ArtistDetailView(client: client, item: item)
+                            ArtistDetailView(client: client, item: artist)
                         } label: {
-                            HStack(alignment: .center, spacing: 12) {
-                                AsyncImageWithFallback(url: item.thumbUrl)
-                                    .frame(width: 64, height: 64)
-                                    .clipShape(RoundedRectangle(cornerRadius: 10))
-
-                                Text(item.title)
-                                    .font(.headline)
-                                    .lineLimit(2)
-
-                                Spacer(minLength: 0)
-                            }
+                            listItemRow(for: artist)
                         }
                     }
                 }
@@ -68,11 +58,19 @@ struct ArtistSearchView: View {
             await debouncedSearch()
         }
     }
+   
+    private func listItemRow(for artist: Artist) -> some View {
+        HStack(alignment: .center, spacing: 12) {
+            AsyncImageWithFallback(url: artist.thumbUrl)
+                .frame(width: 64, height: 64)
+                .clipShape(RoundedRectangle(cornerRadius: 10))
 
-    private var fallbackArtworkIcon: some View {
-        Image(systemName: "person.crop.circle.badge.exclamationmark")
-            .font(.system(size: 28, weight: .light))
-            .foregroundStyle(.secondary)
+            Text(artist.title)
+                .font(.headline)
+                .lineLimit(2)
+
+            Spacer(minLength: 0)
+        }
     }
 
     private func debouncedSearch() async {
