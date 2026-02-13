@@ -1,20 +1,13 @@
-//
-//  ContentView.swift
-//  DiscogsClient
-//
-//  Created by paulo on 12/02/26.
-//
-
 import SwiftUI
 
-struct ArtistsSearchView: View {
+struct ArtistSearchView: View {
     private let client: HTTPClient
     
     private let token = "gMBGYHrUBKsPAJRDmMTbGCLgHlJrdHbMxlCGOqSM"
     private let userAgent = "DiscogsClient/1.0"
 
     @State private var searchText = "Red hot"
-    @State private var results: [DiscogsSearchResult] = []
+    @State private var results: [Artist] = []
     @State private var isLoading = false
     @State private var errorMessage: String?
     @State private var hasSearched = false
@@ -50,15 +43,15 @@ struct ArtistsSearchView: View {
                 } else {
                     List(results) { item in
                         NavigationLink {
-                            ArtistDetailView(
-                                client: client,
-                                item: item,
-                                token: token,
-                                userAgent: userAgent
-                            )
+//                            ArtistDetailView(
+//                                client: client,
+//                                item: item,
+//                                token: token,
+//                                userAgent: userAgent
+//                            )
                         } label: {
                             HStack(alignment: .center, spacing: 12) {
-                                artwork(for: item)
+                                artwork(for: item.thumbUrl)
                                     .frame(width: 64, height: 64)
                                     .clipShape(RoundedRectangle(cornerRadius: 10))
 
@@ -85,9 +78,9 @@ struct ArtistsSearchView: View {
     }
 
     @ViewBuilder
-    private func artwork(for item: DiscogsSearchResult) -> some View {
-        if let thumbnailURL = item.thumbnailURL {
-            AsyncImage(url: thumbnailURL) { phase in
+    private func artwork(for thumbUrl: URL?) -> some View {
+        if let thumbUrl {
+            AsyncImage(url: thumbUrl) { phase in
                 if let image = phase.image {
                     image.resizable().scaledToFill()
                 } else if phase.error != nil {
@@ -142,24 +135,17 @@ struct ArtistsSearchView: View {
             errorMessage = nil
         }
 
-        var components = URLComponents(string: "https://api.discogs.com/database/search")!
-        components.queryItems = [
-            URLQueryItem(name: "q", value: query),
-            URLQueryItem(name: "type", value: "artist"),
-            URLQueryItem(name: "per_page", value: "30")
-        ]
-        
-        var request = URLRequest(url: components.url!)
-        request.httpMethod = "GET"
-        request.setValue("Discogs token=\(token)", forHTTPHeaderField: "Authorization")
-        request.setValue(userAgent, forHTTPHeaderField: "User-Agent")
-
         do {
-            let (data, _) = try await client.send(request)
-            let decoded = try JSONDecoder().decode(DiscogsSearchResponse.self, from: data)
+            let request = ArtistSearchRequest.create(
+                url: "https://api.discogs.com/database/search",
+                query: query
+            )
+            let (data, response) = try await client.send(request)
+            
+            let artists = try ArtistSearchMapper.map(data, response)
             
             await MainActor.run {
-                results = decoded.results
+                results = artists
                 isLoading = false
             }
         } catch {
@@ -199,24 +185,6 @@ struct ArtistsSearchView: View {
     }
 }
 
-private struct DiscogsSearchResponse: Decodable {
-    let results: [DiscogsSearchResult]
-}
-
-struct DiscogsSearchResult: Decodable, Identifiable {
-    let id: Int
-    let title: String
-    let type: String?
-    let country: String?
-    let year: Int?
-    let thumb: String?
-
-    var thumbnailURL: URL? {
-        guard let thumb, !thumb.isEmpty else { return nil }
-        return URL(string: thumb)
-    }
-}
-
 #Preview {
-    ArtistsSearchView()
+    ArtistSearchView()
 }

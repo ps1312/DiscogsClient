@@ -9,7 +9,7 @@ import SwiftUI
 
 struct ArtistDetailView: View {
     let client: HTTPClient
-    let item: DiscogsSearchResult
+    let item: DiscogsArtistSearchResult
     let token: String
     let userAgent: String
 
