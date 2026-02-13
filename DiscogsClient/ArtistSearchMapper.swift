@@ -3,9 +3,7 @@ import Foundation
 struct DiscogsArtistSearchResult: Decodable, Identifiable {
     let id: Int
     let title: String
-    let type: String?
-    let country: String?
-    let year: Int?
+    let type: String
     let thumb: String?
 
     var thumbnailURL: URL? {
@@ -15,26 +13,22 @@ struct DiscogsArtistSearchResult: Decodable, Identifiable {
 }
 
 class ArtistSearchMapper {
-    struct PaginationResponse: Decodable {
+    struct PageMetadata: Decodable {
         let page: Int
         let pages: Int
         let per_page: Int
         let items: Int
     }
     
-    struct SearchResponse: Decodable {
-        let pagination: PaginationResponse
+    struct Root: Decodable {
+        let pagination: PageMetadata
         let results: [DiscogsArtistSearchResult]
     }
     
     static func map(_ data: Data, _ response: HTTPURLResponse) throws -> [Artist] {
-        let decoded = try JSONDecoder().decode(SearchResponse.self, from: data)
+        let decoded = try JSONDecoder().decode(Root.self, from: data)
         return decoded.results.map {
-            Artist(
-                id: $0.id,
-                title: $0.title,
-                thumbUrl: $0.thumbnailURL
-            )
+            Artist(id: $0.id, title: $0.title, thumbUrl: $0.thumbnailURL)
         }
     }
 }

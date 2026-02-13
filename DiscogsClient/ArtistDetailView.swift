@@ -25,8 +25,6 @@ struct ArtistDetailView: View {
                 VStack(alignment: .leading, spacing: 10) {
                     DetailRow(label: "Real Name", value: artist?.realname)
                     DetailRow(label: "Type", value: displayType)
-                    DetailRow(label: "Country", value: item.country)
-                    DetailRow(label: "Year", value: item.year.map(String.init))
                     DetailRow(label: "Discogs ID", value: String(item.id))
                 }
                 .padding(.horizontal, 20)
@@ -211,7 +209,7 @@ struct ArtistDetailView: View {
     }
 
     private var displayType: String {
-        bandMembers.isEmpty ? (item.type?.capitalized ?? "Artist") : "Band"
+        bandMembers.isEmpty ? "Artist" : "Band"
     }
 
     private var bandMembers: [DiscogsArtistMember] {

@@ -43,12 +43,12 @@ struct ArtistSearchView: View {
                 } else {
                     List(results) { item in
                         NavigationLink {
-//                            ArtistDetailView(
-//                                client: client,
-//                                item: item,
-//                                token: token,
-//                                userAgent: userAgent
-//                            )
+                            ArtistDetailView(
+                                client: client,
+                                item: DiscogsArtistSearchResult(id: item.id, title: item.title, type: "Artist", thumb: item.thumbUrl?.absoluteString),
+                                token: token,
+                                userAgent: userAgent
+                            )
                         } label: {
                             HStack(alignment: .center, spacing: 12) {
                                 artwork(for: item.thumbUrl)
