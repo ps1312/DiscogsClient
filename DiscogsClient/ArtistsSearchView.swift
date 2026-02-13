@@ -8,14 +8,20 @@
 import SwiftUI
 
 struct ArtistsSearchView: View {
+    private let client: HTTPClient
+    
     private let token = "gMBGYHrUBKsPAJRDmMTbGCLgHlJrdHbMxlCGOqSM"
     private let userAgent = "DiscogsClient/1.0"
 
-    @State private var searchText = ""
+    @State private var searchText = "Red hot"
     @State private var results: [DiscogsSearchResult] = []
     @State private var isLoading = false
     @State private var errorMessage: String?
     @State private var hasSearched = false
+    
+    init(httpClient: HTTPClient = URLSession.shared) {
+        self.client = httpClient
+    }
 
     var body: some View {
         NavigationStack {
@@ -45,6 +51,7 @@ struct ArtistsSearchView: View {
                     List(results) { item in
                         NavigationLink {
                             ArtistDetailView(
+                                client: client,
                                 item: item,
                                 token: token,
                                 userAgent: userAgent
@@ -148,19 +155,9 @@ struct ArtistsSearchView: View {
         request.setValue(userAgent, forHTTPHeaderField: "User-Agent")
 
         do {
-            let (data, response) = try await URLSession.shared.data(for: request)
-            
-            if let httpResponse = response as? HTTPURLResponse {
-                guard (200 ... 299).contains(httpResponse.statusCode) else {
-                    await MainActor.run {
-                        isLoading = false
-                        errorMessage = "HTTP \(httpResponse.statusCode)"
-                    }
-                    return
-                }
-            }
-
+            let (data, _) = try await client.send(request)
             let decoded = try JSONDecoder().decode(DiscogsSearchResponse.self, from: data)
+            
             await MainActor.run {
                 results = decoded.results
                 isLoading = false

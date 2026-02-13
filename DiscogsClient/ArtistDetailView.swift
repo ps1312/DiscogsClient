@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct ArtistDetailView: View {
+    let client: HTTPClient
     let item: DiscogsSearchResult
     let token: String
     let userAgent: String
@@ -134,6 +135,7 @@ struct ArtistDetailView: View {
             HStack(spacing: 10) {
                 NavigationLink {
                     ArtistAlbumsView(
+                        client: client,
                         artistID: item.id,
                         token: token,
                         userAgent: userAgent
@@ -229,15 +231,7 @@ struct ArtistDetailView: View {
         request.setValue(userAgent, forHTTPHeaderField: "User-Agent")
 
         do {
-            let (data, response) = try await URLSession.shared.data(for: request)
-            if let httpResponse = response as? HTTPURLResponse, !(200 ... 299).contains(httpResponse.statusCode) {
-                await MainActor.run {
-                    isLoadingArtist = false
-                    errorMessage = "Failed to load artist details (HTTP \(httpResponse.statusCode))."
-                }
-                return
-            }
-
+            let (data, _) = try await client.send(request)
             let decoded = try JSONDecoder().decode(DiscogsArtist.self, from: data)
             await MainActor.run {
                 artist = decoded

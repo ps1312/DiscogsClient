@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct ArtistAlbumsView: View {
+    let client: HTTPClient
     let artistID: Int
     let token: String
     let userAgent: String
@@ -191,14 +192,7 @@ struct ArtistAlbumsView: View {
         request.setValue(userAgent, forHTTPHeaderField: "User-Agent")
 
         do {
-            let (data, response) = try await URLSession.shared.data(for: request)
-            if let httpResponse = response as? HTTPURLResponse, !(200 ... 299).contains(httpResponse.statusCode) {
-                await MainActor.run {
-                    isLoading = false
-                    errorMessage = "Failed to load albums (HTTP \(httpResponse.statusCode))."
-                }
-                return
-            }
+            let (data, _) = try await client.send(request)
 
             let decoded = try JSONDecoder().decode(DiscogsArtistReleasesResponse.self, from: data)
             let filteredAlbums = decoded.releases.filter(\.isAlbum)
