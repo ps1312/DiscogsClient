@@ -6,4 +6,5 @@ struct Artist: Identifiable {
     let thumbUrl: URL?
     let imageUrl: URL?
     let profile: String?
+    let bandMembers: [BandMember]?
 }

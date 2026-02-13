@@ -4,7 +4,7 @@ struct ArtistDetailView: View {
     let client: HTTPClient
 
     @State private var item: Artist
-    @State private var artist: DiscogsArtist?
+    @State private var artist: ArtistDetailMapper.DiscogsArtistDetailResult?
     @State private var isLoadingArtist = false
     @State private var errorMessage: String?
     
@@ -17,6 +17,7 @@ struct ArtistDetailView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
                 artwork
+                    .clipShape(RoundedRectangle(cornerRadius: 12))
                     .clipped()
 
                 VStack(alignment: .leading, spacing: 10) {
@@ -38,43 +39,35 @@ struct ArtistDetailView: View {
                 .buttonStyle(.borderedProminent)
                 .padding(.horizontal, 20)
 
-//                if !bandMembers.isEmpty || !profileText.isEmpty {
-//                    Divider()
-//                        .padding(.horizontal, 20)
-//                }
-//
-//                if !bandMembers.isEmpty {
-//                    VStack(alignment: .leading, spacing: 10) {
-//                        Text("Members")
-//                            .font(.headline)
-//
-//                        ForEach(Array(bandMembers.enumerated()), id: \.element.id) { index, member in
-//                            HStack(spacing: 10) {
-//                                Image(systemName: "person.fill")
-//                                    .font(.caption)
-//                                    .foregroundStyle(.secondary)
-//                                Text(member.name)
-//                                    .font(.body)
-//                                if index == bandMembers.count - 1 {
-//                                    Text("Past")
-//                                        .font(.caption.weight(.semibold))
-//                                        .foregroundStyle(.secondary)
-//                                        .padding(.horizontal, 8)
-//                                        .padding(.vertical, 3)
-//                                        .background(.secondary.opacity(0.15), in: Capsule())
-//                                }
-//                                Spacer(minLength: 0)
-//                            }
-//                            .padding(.vertical, 4)
-//                        }
-//                    }
-//                    .padding(.horizontal, 20)
-//
-//                    if !profileText.isEmpty {
-//                        Divider()
-//                            .padding(.horizontal, 20)
-//                    }
-//                }
+                if let members = item.bandMembers {
+                    VStack(alignment: .leading, spacing: 10) {
+                        Text("Members")
+                            .font(.headline)
+
+                        ForEach(Array(members.enumerated()), id: \.element.id) { index, member in
+                            HStack(spacing: 10) {
+                                Image(systemName: "person.fill")
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                                
+                                Text(member.name)
+                                    .font(.body)
+                                
+                                if !member.active {
+                                    Text("Past")
+                                        .font(.caption.weight(.semibold))
+                                        .foregroundStyle(.secondary)
+                                        .padding(.horizontal, 8)
+                                        .padding(.vertical, 3)
+                                        .background(.secondary.opacity(0.15), in: Capsule())
+                                }
+                                Spacer(minLength: 0)
+                            }
+                            .padding(.vertical, 4)
+                        }
+                    }
+                    .padding(.horizontal, 20)
+                }
                 
                 if let profile = item.profile {
                     VStack(alignment: .leading, spacing: 8) {
@@ -139,31 +132,11 @@ struct ArtistDetailView: View {
         }
     }
 
-    private var displayName: String {
-        artist?.name ?? item.title
-    }
-
-    private var profileText: String {
-        guard let profile = artist?.profile else { return "" }
-        return cleanProfile(profile)
-    }
-
-    private var profilePreview: String {
-        guard !profileText.isEmpty else { return "" }
-        let maxLength = 140
-        if profileText.count <= maxLength {
-            return profileText
-        }
-
-        let end = profileText.index(profileText.startIndex, offsetBy: maxLength)
-        return String(profileText[..<end]).trimmingCharacters(in: .whitespacesAndNewlines) + "..."
-    }
-
     private var displayType: String {
         bandMembers.isEmpty ? "Artist" : "Band"
     }
 
-    private var bandMembers: [DiscogsArtistMember] {
+    private var bandMembers: [BandMember] {
         guard let members = artist?.members else { return [] }
         return members.filter { !$0.name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }
     }
@@ -213,35 +186,4 @@ private struct DetailRow: View {
             Spacer()
         }
     }
-}
-
-struct DiscogsArtist: Decodable {
-    let id: Int
-    let name: String
-    let profile: String?
-    let images: [DiscogsArtistImage]?
-    let members: [DiscogsArtistMember]?
-
-    var primaryImageURL: URL? {
-        guard let images else { return nil }
-
-        let preferred = images.first(where: { $0.type == "primary" }) ?? images.first
-
-        if let uri = preferred?.uri, !uri.isEmpty {
-            return URL(string: uri)
-        }
-
-        return nil
-    }
-}
-
-struct DiscogsArtistImage: Decodable {
-    let type: String?
-    let uri: String?
-}
-
-struct DiscogsArtistMember: Decodable, Identifiable {
-    let id: Int
-    let name: String
-    let active: Bool?
 }

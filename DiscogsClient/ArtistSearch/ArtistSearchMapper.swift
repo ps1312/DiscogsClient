@@ -33,7 +33,8 @@ class ArtistSearchMapper {
                 title: $0.title,
                 thumbUrl: $0.thumbnailURL,
                 imageUrl: nil,
-                profile: nil
+                profile: nil,
+                bandMembers: nil
             )
         }
         return models

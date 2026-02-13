@@ -1,15 +1,39 @@
 import Foundation
 
 class ArtistDetailMapper {
-    static func map(_ data: Data, _ response: HTTPURLResponse, preserving item: Artist) throws -> Artist {
-        let decoded = try JSONDecoder().decode(DiscogsArtist.self, from: data)
+    struct DiscogsArtistImage: Decodable {
+        let type: String
+        let uri: String
+    }
+
+    struct DiscogsArtistDetailResult: Decodable {
+        let id: Int
+        let name: String
+        let profile: String?
+        let images: [DiscogsArtistImage]?
+        let members: [BandMember]?
+    }
+
+    static func map(_ data: Data, _ response: HTTPURLResponse, preserving existing: Artist) throws -> Artist {
+        let artist = try JSONDecoder().decode(DiscogsArtistDetailResult.self, from: data)
         
         return Artist(
-            id: decoded.id,
-            title: item.title,
-            thumbUrl: item.thumbUrl,
-            imageUrl: decoded.primaryImageURL,
-            profile: decoded.profile
+            id: artist.id,
+            title: existing.title,
+            thumbUrl: existing.thumbUrl,
+            imageUrl: findPrimaryImageUrl(artist.images),
+            profile: artist.profile,
+            bandMembers: artist.members
         )
+    }
+    
+    private static func findPrimaryImageUrl(_ images: [DiscogsArtistImage]?) -> URL? {
+        var imageUrl: URL? = nil
+        
+        if let primaryImage = images?.first(where: { $0.type == "primary" }) {
+            imageUrl = URL(string: primaryImage.uri)
+        }
+        
+        return imageUrl
     }
 }
