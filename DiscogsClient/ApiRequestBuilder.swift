@@ -1,7 +1,7 @@
 import Foundation
 
 class ApiRequestBuilder {
-    private static let token = "gMBGYHrUBKsPAJRDmMTbGCLgHlJrdHbMxlCGOqSM"
+    private static let token = "#{TOKEN_HERE}"
     private static let userAgent = "DiscogsClient/1.0"
 
     static func search(query: String, page: Int = 1) -> URLRequest {
