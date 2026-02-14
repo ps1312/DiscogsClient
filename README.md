@@ -52,25 +52,25 @@ This facilitates a lot when implementing unit tests, specially using dependency 
 7. Lots of tests pointing to the DiscogsApi.
 
 - And some tasks that were continuous during all the test:
+  - Improving `endpoint.md` with the contracts based on testing the real DiscogsApi.
+  - UI improvements, using new liquid glass components.
+  - Keep the business logic and UI separated.
 
-* Improving `endpoint.md` with the contracts based on testing the real DiscogsApi.
-* UI improvements, using new liquid glass components.
-* Keep the business logic and UI separated.
+## Challenges on the `albums` endpoint
 
-## Challenges
+1. Data problems with the albums endpoint:
+   - Duplicated ids on results (`screenshots/duplicate_release_results.png`). This was fixed by deduping the responses on the albums view model.
+   - No support for filters, the filtering has to be done locally. This raises some bad UX, like the filters increasing in size as the user paginates (older records add older years to the filter).
+   - No "genre" support in `/artists/{id}/releases`. The endpoint does not expose reliable genre property in the response. Year/label are derived from the json fields and processed locally.
 
-1. was not able to find gender when fetching `/releases`
-2. Albums endpoint appears to have a lot of inconsistencies
+2. Can't use the `/search` endpoint to fetch only **albums** because the endpoint also returns albums from other bands with the same name. To get more reliable data it's better to use `/artists/{id}/releases`.
 
-- duplicated results (image), fixed by:
-- sort not working (image), mitigated by:
-- the endpoint does not support sending filters, so the filtering is done locally
-
-3. Can use search only for albums because it returns albums from other “Nirvana” bands, we cant send an artistId. We can pass an artistId on the Releases endpoint:
+3. We don't have a direct way to define if a release is an album or not. To mitigate this, the app uses a group of properties to try to determine that a release is an album, you can check the condition in `ArtistAlbumsMapper.swift`
 
 ## Static Analysis
 
-SwiftLint is configured through SPM. Run by building the project in Xcode.
+- SwiftLint is configured through SPM. Run by building the project in Xcode.
+- Really useful for removing unused blank space and enforcing conventions, like: `var imageUrl: URL? in favor of var imageUrl: URL? = nil`
 
 ## Project Structure
 
