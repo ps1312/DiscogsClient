@@ -36,6 +36,14 @@ struct ArtistAlbumsFilterView: View {
             }
             .frame(width: 124)
 
+            Menu {
+                Button("All Genres") {}
+            } label: {
+                filterChip(title: "Genre")
+            }
+            .frame(width: 120)
+            .disabled(true)
+
             Spacer(minLength: 0)
         }
         .padding(.horizontal)
