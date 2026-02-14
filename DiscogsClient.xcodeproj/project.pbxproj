@@ -7,8 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		3AA332D62F40D3D7002462D2 /* SwiftLintFramework in Frameworks */ = {isa = PBXBuildFile; productRef = 3AA332D52F40D3D7002462D2 /* SwiftLintFramework */; };
-		3AA332D82F40D3D7002462D2 /* swiftlint in Frameworks */ = {isa = PBXBuildFile; productRef = 3AA332D72F40D3D7002462D2 /* swiftlint */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -64,8 +62,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				3AA332D62F40D3D7002462D2 /* SwiftLintFramework in Frameworks */,
-				3AA332D82F40D3D7002462D2 /* swiftlint in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -142,8 +138,6 @@
 			);
 			name = DiscogsClient;
 			packageProductDependencies = (
-				3AA332D52F40D3D7002462D2 /* SwiftLintFramework */,
-				3AA332D72F40D3D7002462D2 /* swiftlint */,
 			);
 			productName = DiscogsClient;
 			productReference = 3A8C19902F3DFBFE005DC215 /* DiscogsClient.app */;
@@ -509,16 +503,6 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		3AA332D52F40D3D7002462D2 /* SwiftLintFramework */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 3AA332D42F40D3D7002462D2 /* XCRemoteSwiftPackageReference "SwiftLint" */;
-			productName = SwiftLintFramework;
-		};
-		3AA332D72F40D3D7002462D2 /* swiftlint */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 3AA332D42F40D3D7002462D2 /* XCRemoteSwiftPackageReference "SwiftLint" */;
-			productName = swiftlint;
-		};
 		3AA332D92F40D3E5002462D2 /* SwiftLintBuildToolPlugin */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 3AA332D42F40D3D7002462D2 /* XCRemoteSwiftPackageReference "SwiftLint" */;
