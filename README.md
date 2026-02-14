@@ -27,7 +27,8 @@ SwiftUI iOS app that integrates with the Discogs API to:
 
 From Xcode:
 
-- `Product` -> `Test`
+1. Select the `DiscogsClientTests` schema
+2. `Product` -> `Test`
 
 ## Architecture And Reasoning
 
