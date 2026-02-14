@@ -1,14 +1,14 @@
 import SwiftUI
 
 struct ArtistDetailView: View {
-    @ObservedObject private var viewModel: ArtistDetailViewModel
+    @StateObject private var viewModel: ArtistDetailViewModel
     private let makeArtistAlbumsView: (Int) -> ArtistAlbumsView
     
     init(
         viewModel: ArtistDetailViewModel,
         makeArtistAlbumsView: @escaping (Int) -> ArtistAlbumsView
     ) {
-        self.viewModel = viewModel
+        _viewModel = StateObject(wrappedValue: viewModel)
         self.makeArtistAlbumsView = makeArtistAlbumsView
     }
 
