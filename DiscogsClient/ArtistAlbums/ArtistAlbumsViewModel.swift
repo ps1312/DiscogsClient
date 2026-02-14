@@ -7,12 +7,12 @@ final class ArtistAlbumsViewModel: ObservableObject {
     @Published private(set) var isFirstLoading = false
     @Published private(set) var isLoadingMore = false
     @Published private(set) var errorMessage: String?
+    @Published private(set) var currentPage = 0
+    @Published private(set) var totalPages = 0
 
     let artistID: Int
 
     private let client: HTTPClient
-    private var currentPage = 0
-    private var totalPages = 0
 
     init(client: HTTPClient, artistID: Int) {
         self.client = client

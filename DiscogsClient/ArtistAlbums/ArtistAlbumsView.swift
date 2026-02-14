@@ -127,6 +127,13 @@ struct ArtistAlbumsView: View {
                 filterChip(title: selectedLabel ?? "Label")
             }
             .frame(width: 124)
+
+            Spacer(minLength: 0)
+
+            Text("Page \(viewModel.currentPage) / \(viewModel.totalPages)")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+                .lineLimit(1)
         }
         .padding(.horizontal)
         .animation(.none, value: selectedYear)
