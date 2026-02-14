@@ -2,6 +2,8 @@ import SwiftUI
 
 struct ArtistSearchView: View {
     @ObservedObject private var viewModel: ArtistSearchViewModel
+    @FocusState private var isSearchFieldFocused: Bool
+    @State private var hasAppliedInitialSearchFocus = false
     private let makeArtistDetailView: (Artist) -> ArtistDetailView
     
     init(
@@ -37,26 +39,37 @@ struct ArtistSearchView: View {
                     .padding(.horizontal, 24)
                     Spacer()
                 } else {
-                    List {
-                        ForEach(viewModel.results) { artist in
-                            NavigationLink {
-                                makeArtistDetailView(artist)
-                            } label: {
-                                listItemRow(for: artist)
-                            }
-                            .onAppear {
-                                guard artist.id == viewModel.results.last?.id else { return }
-                                Task { await viewModel.loadNextPage() }
-                            }
+                    VStack(spacing: 0) {
+                        HStack {
+                            Spacer()
+                            Text("Page \(viewModel.currentPage) / \(viewModel.totalPages)")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                                .padding(.horizontal, 16)
+                                .padding(.vertical, 8)
                         }
 
-                        if viewModel.isLoadingMore {
-                            HStack {
-                                Spacer()
-                                ProgressView()
-                                Spacer()
+                        List {
+                            ForEach(viewModel.results) { artist in
+                                NavigationLink {
+                                    makeArtistDetailView(artist)
+                                } label: {
+                                    listItemRow(for: artist)
+                                }
+                                .onAppear {
+                                    guard artist.id == viewModel.results.last?.id else { return }
+                                    Task { await viewModel.loadNextPage() }
+                                }
                             }
-                            .padding()
+
+                            if viewModel.isLoadingMore {
+                                HStack {
+                                    Spacer()
+                                    ProgressView()
+                                    Spacer()
+                                }
+                                .padding()
+                            }
                         }
                     }
                 }
@@ -67,6 +80,12 @@ struct ArtistSearchView: View {
                 text: $viewModel.searchText,
                 prompt: "Search for artists...",
             )
+            .searchFocused($isSearchFieldFocused)
+            .onAppear {
+                guard !hasAppliedInitialSearchFocus else { return }
+                hasAppliedInitialSearchFocus = true
+                isSearchFieldFocused = true
+            }
         }
         .task(id: viewModel.searchText) {
             await viewModel.searchDebounced(query: viewModel.searchText)
@@ -79,9 +98,15 @@ struct ArtistSearchView: View {
                 .frame(width: 64, height: 64)
                 .clipShape(RoundedRectangle(cornerRadius: 10))
 
-            Text(artist.title)
-                .font(.headline)
-                .lineLimit(2)
+            VStack(alignment: .leading, spacing: 4) {
+                Text(artist.title)
+                    .font(.headline)
+                    .lineLimit(2)
+
+                Text("ID: \(artist.id)")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
 
             Spacer(minLength: 0)
         }

@@ -28,6 +28,8 @@ final class ArtistSearchViewModelTests: XCTestCase {
         XCTAssertFalse(sut.isFirstLoading)
         XCTAssertFalse(sut.isLoadingMore)
         XCTAssertNil(sut.errorMessage)
+        XCTAssertEqual(sut.currentPage, 0)
+        XCTAssertEqual(sut.totalPages, 0)
     }
 
     @MainActor
@@ -53,6 +55,8 @@ final class ArtistSearchViewModelTests: XCTestCase {
         XCTAssertFalse(sut.isFirstLoading)
         XCTAssertFalse(sut.isLoadingMore)
         XCTAssertNil(sut.errorMessage)
+        XCTAssertEqual(sut.currentPage, 1)
+        XCTAssertEqual(sut.totalPages, 2)
         XCTAssertEqual(client.requests.count, 1)
         
         let firstRequest = try XCTUnwrap(client.requests.first)
@@ -90,6 +94,8 @@ final class ArtistSearchViewModelTests: XCTestCase {
         XCTAssertEqual(sut.results.map(\.title), ["ABBA", "A-Teens"])
         XCTAssertEqual(sut.results.first?.id, 1)
         XCTAssertEqual(sut.results.last?.id, 2)
+        XCTAssertEqual(sut.currentPage, 2)
+        XCTAssertEqual(sut.totalPages, 2)
         XCTAssertEqual(client.requests.count, 2)
 
         let secondRequest = try XCTUnwrap(client.requests.last)

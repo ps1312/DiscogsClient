@@ -154,6 +154,7 @@ struct ArtistAlbumsView: View {
         if let label = release.label {
             parts.append(label)
         }
+        parts.append("ID: \(release.id)")
         return parts.joined(separator: " • ")
     }
 }

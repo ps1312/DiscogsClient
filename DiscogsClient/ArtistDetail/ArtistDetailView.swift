@@ -16,6 +16,9 @@ struct ArtistDetailView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
                 AsyncImageWithFallback(url: viewModel.artist.imageUrl ?? viewModel.artist.thumbUrl)
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 250)
+                    .background(Color(uiColor: .secondarySystemFill))
                     .clipShape(RoundedRectangle(cornerRadius: 12))
                     .clipped()
 
@@ -107,4 +110,5 @@ struct ArtistDetailView: View {
             Spacer()
         }
     }
+
 }
