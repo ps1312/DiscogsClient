@@ -105,6 +105,44 @@ final class ArtistAlbumsViewModelTests: XCTestCase {
     }
 
     @MainActor
+    func test_loadNextPage_duplicateReleaseID_mergesIntoSingleAlbum() async {
+        let client = FakeHTTPClient()
+        client.responses = [
+            .success(
+                data: makeAlbumsPayload(
+                    page: 1,
+                    pages: 2,
+                    releases: [
+                        (id: 1484452, title: "Musical Mastication Volume 4", year: nil, format: nil, type: "master", label: nil)
+                    ]
+                ),
+                statusCode: 200
+            ),
+            .success(
+                data: makeAlbumsPayload(
+                    page: 2,
+                    pages: 2,
+                    releases: [
+                        (id: 1484452, title: "Musical Mastication Volume 4", year: 2018, format: nil, type: "master", label: "Discogs Label")
+                    ]
+                ),
+                statusCode: 200
+            )
+        ]
+
+        let sut = ArtistAlbumsViewModel(client: client, artistID: 77)
+
+        await sut.fetchAlbums()
+        await sut.loadNextPage()
+
+        XCTAssertEqual(sut.albums.count, 1)
+        XCTAssertEqual(sut.albums.map(\.id), [1484452])
+        XCTAssertEqual(sut.albums.first?.year, 2018)
+        XCTAssertEqual(sut.albums.first?.label, "Discogs Label")
+        XCTAssertEqual(client.requests.count, 2)
+    }
+
+    @MainActor
     func test_loadNextPage_whenNoMorePages_doesNothing() async {
         let client = FakeHTTPClient()
         client.responses = [

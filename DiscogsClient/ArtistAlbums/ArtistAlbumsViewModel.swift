@@ -56,15 +56,34 @@ final class ArtistAlbumsViewModel: ObservableObject {
             currentPage = page.page
             totalPages = page.pages
 
-            if appending {
-                albums.append(contentsOf: page.albums)
-            } else {
-                albums = page.albums
-            }
+            albums = Self.mergeAlbums(existing: albums, incoming: page.albums)
             albums.sort(by: Self.albumSort)
         } catch {
             errorMessage = "Failed to load albums: \(error.localizedDescription)"
         }
+    }
+
+    private static func mergeAlbums(existing: [ArtistRelease], incoming: [ArtistRelease]) -> [ArtistRelease] {
+        var mergedByID = Dictionary(uniqueKeysWithValues: existing.map { ($0.id, $0) })
+
+        for release in incoming {
+            guard let current = mergedByID[release.id] else {
+                mergedByID[release.id] = release
+                continue
+            }
+
+            mergedByID[release.id] = ArtistRelease(
+                id: current.id,
+                title: release.title,
+                year: release.year ?? current.year,
+                thumb: release.thumb ?? current.thumb,
+                format: release.format ?? current.format,
+                type: release.type ?? current.type,
+                label: release.label ?? current.label
+            )
+        }
+
+        return Array(mergedByID.values)
     }
 
     private static func albumSort(lhs: ArtistRelease, rhs: ArtistRelease) -> Bool {
