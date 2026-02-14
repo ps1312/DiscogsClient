@@ -5,7 +5,7 @@ struct ArtistSearchView: View {
     @FocusState private var isSearchFieldFocused: Bool
     @State private var hasAppliedInitialSearchFocus = false
     private let makeArtistDetailView: (Artist) -> ArtistDetailView
-    
+
     init(
         viewModel: ArtistSearchViewModel,
         makeArtistDetailView: @escaping (Artist) -> ArtistDetailView
@@ -103,7 +103,7 @@ struct ArtistSearchView: View {
             await viewModel.searchDebounced(query: viewModel.searchText)
         }
     }
-   
+
     private func listItemRow(for artist: Artist) -> some View {
         HStack(alignment: .center, spacing: 12) {
             AsyncImageWithFallback(url: artist.thumbUrl)

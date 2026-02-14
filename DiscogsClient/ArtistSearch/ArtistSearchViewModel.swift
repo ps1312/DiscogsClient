@@ -4,7 +4,7 @@ import Combine
 @MainActor
 final class ArtistSearchViewModel: ObservableObject {
     @Published var searchText = ""
-    
+
     @Published private(set) var isFirstLoading = false
     @Published private(set) var isLoadingMore = false
     @Published private(set) var paginated = Paginated<Artist>(
@@ -18,7 +18,7 @@ final class ArtistSearchViewModel: ObservableObject {
 
     private let client: HTTPClient
     private var currentQuery: String = ""
-    
+
     var trimmedSearchText: String {
         searchText.trimmingCharacters(in: .whitespacesAndNewlines)
     }
@@ -55,11 +55,11 @@ final class ArtistSearchViewModel: ObservableObject {
         isLoadingMore = true
         errorMessage = nil
         paginationErrorMessage = nil
-        
+
         let nextPage = paginated.currentPage + 1
         await loadPage(query: currentQuery, page: nextPage)
     }
-    
+
     private func setSearchIsEmpty() {
         hasSearched = false
         paginated = Paginated(items: [], currentPage: 0, totalPages: 0)
@@ -69,7 +69,7 @@ final class ArtistSearchViewModel: ObservableObject {
         isLoadingMore = false
         currentQuery = ""
     }
-    
+
     private func setSearchStarted(with committedQuery: String) {
         hasSearched = true
         paginated = Paginated(items: [], currentPage: 0, totalPages: 0)
@@ -101,7 +101,7 @@ final class ArtistSearchViewModel: ObservableObject {
 
             isFirstLoading = false
             isLoadingMore = false
-            
+
             if requestedPage > 1, !paginated.items.isEmpty {
                 errorMessage = nil
                 paginationErrorMessage = "Couldn't load more results. Please try again later."

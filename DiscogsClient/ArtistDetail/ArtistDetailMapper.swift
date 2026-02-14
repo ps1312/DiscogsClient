@@ -16,7 +16,7 @@ class ArtistDetailMapper {
 
     static func map(_ data: Data, _ response: HTTPURLResponse, preserving existing: Artist) throws -> Artist {
         let artist = try JSONDecoder().decode(DiscogsArtistDetailResult.self, from: data)
-        
+
         return Artist(
             id: artist.id,
             title: existing.title,
@@ -26,14 +26,14 @@ class ArtistDetailMapper {
             bandMembers: artist.members
         )
     }
-    
+
     private static func findPrimaryImageUrl(_ images: [DiscogsArtistImage]?) -> URL? {
-        var imageUrl: URL? = nil
-        
+        var imageUrl: URL?
+
         if let primaryImage = images?.first(where: { $0.type == "primary" }) {
             imageUrl = URL(string: primaryImage.uri)
         }
-        
+
         return imageUrl
     }
 }

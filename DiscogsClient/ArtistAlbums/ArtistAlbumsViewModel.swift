@@ -69,7 +69,7 @@ final class ArtistAlbumsViewModel: ObservableObject {
             let mergedAlbums = Self.mergeAlbums(existing: paginated.items, incoming: page.items)
                 .sorted(by: Self.albumSort)
             paginationErrorMessage = nil
-            
+
             paginated = Paginated(
                 items: mergedAlbums,
                 currentPage: page.currentPage,

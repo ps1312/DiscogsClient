@@ -12,7 +12,7 @@ class ArtistSearchMapper {
             return URL(string: thumb)
         }
     }
-    
+
     private struct Root: Decodable {
         let pagination: DiscogsPageMetadata
         let results: [DiscogsArtistSearchResult]

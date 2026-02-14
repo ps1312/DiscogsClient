@@ -3,7 +3,7 @@ import SwiftUI
 struct ArtistDetailView: View {
     @StateObject private var viewModel: ArtistDetailViewModel
     private let makeArtistAlbumsView: (Int) -> ArtistAlbumsView
-    
+
     init(
         viewModel: ArtistDetailViewModel,
         makeArtistAlbumsView: @escaping (Int) -> ArtistAlbumsView
@@ -54,7 +54,10 @@ struct ArtistDetailView: View {
                     }
                     .padding(.horizontal, 14)
                     .padding(.vertical, 12)
-                    .background(Color(uiColor: .secondarySystemBackground), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+                    .background(
+                        Color(uiColor: .secondarySystemBackground),
+                        in: RoundedRectangle(cornerRadius: 12, style: .continuous)
+                    )
                 }
                 .buttonStyle(.plain)
                 .padding(.horizontal, 20)
@@ -75,10 +78,10 @@ struct ArtistDetailView: View {
                                 Image(systemName: "person.fill")
                                     .font(.caption)
                                     .foregroundStyle(.secondary)
-                                
+
                                 Text(member.name)
                                     .font(.body)
-                                
+
                                 if !member.active {
                                     Text("Past")
                                         .font(.caption.weight(.semibold))
@@ -94,7 +97,7 @@ struct ArtistDetailView: View {
                     }
                     .padding(.horizontal, 20)
                 }
-                
+
                 if let profile = viewModel.artist.profile, !profile.isEmpty {
                     VStack(alignment: .leading, spacing: 8) {
                         Text("Profile")
