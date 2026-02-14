@@ -40,7 +40,7 @@ The app uses an MVVM-style structure with clear separation between presentation,
 - `HTTPClient` protocol to allow dependency injection and better testability.
 - `URLSession` to make network requests by implementing an extension in `HTTPClient+URLSession.swift`.
 
-This facilitates a lot when implementing unit tests, specially using dependency injection when creating the ViewModels. The structure also alows easy navigation between view and data components. Good separation of concerns also makes implementing new features more easily and faster. For me, tests are a must, it gives a lot of confidence when making new changes on existing code.
+This choice was made because it facilitates a lot when implementing unit tests, specially using dependency injection when creating the ViewModels. The structure also alows easy navigation between view and data components. Good separation of concerns makes implementing new features more easily and faster. For me, tests are a must, it gives a lot of confidence when making new changes on existing code.
 
 ## Analysis And Development Process
 
