@@ -6,11 +6,27 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXContainerItemProxy section */
+		3A46CDFF2F40215800240ECA /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 3A8C19882F3DFBFE005DC215 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 3A8C198F2F3DFBFE005DC215;
+			remoteInfo = DiscogsClient;
+		};
+/* End PBXContainerItemProxy section */
+
 /* Begin PBXFileReference section */
+		3A46CDFB2F40215800240ECA /* DiscogsClientTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = DiscogsClientTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		3A8C19902F3DFBFE005DC215 /* DiscogsClient.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DiscogsClient.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
+		3A46CDFC2F40215800240ECA /* DiscogsClientTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = DiscogsClientTests;
+			sourceTree = "<group>";
+		};
 		3A8C19922F3DFBFE005DC215 /* DiscogsClient */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = DiscogsClient;
@@ -19,6 +35,13 @@
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		3A46CDF82F40215800240ECA /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		3A8C198D2F3DFBFE005DC215 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -33,6 +56,7 @@
 			isa = PBXGroup;
 			children = (
 				3A8C19922F3DFBFE005DC215 /* DiscogsClient */,
+				3A46CDFC2F40215800240ECA /* DiscogsClientTests */,
 				3A8C19912F3DFBFE005DC215 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -41,6 +65,7 @@
 			isa = PBXGroup;
 			children = (
 				3A8C19902F3DFBFE005DC215 /* DiscogsClient.app */,
+				3A46CDFB2F40215800240ECA /* DiscogsClientTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -48,6 +73,29 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		3A46CDFA2F40215800240ECA /* DiscogsClientTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 3A46CE012F40215800240ECA /* Build configuration list for PBXNativeTarget "DiscogsClientTests" */;
+			buildPhases = (
+				3A46CDF72F40215800240ECA /* Sources */,
+				3A46CDF82F40215800240ECA /* Frameworks */,
+				3A46CDF92F40215800240ECA /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				3A46CE002F40215800240ECA /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				3A46CDFC2F40215800240ECA /* DiscogsClientTests */,
+			);
+			name = DiscogsClientTests;
+			packageProductDependencies = (
+			);
+			productName = DiscogsClientTests;
+			productReference = 3A46CDFB2F40215800240ECA /* DiscogsClientTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 		3A8C198F2F3DFBFE005DC215 /* DiscogsClient */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 3A8C199B2F3DFBFE005DC215 /* Build configuration list for PBXNativeTarget "DiscogsClient" */;
@@ -80,6 +128,10 @@
 				LastSwiftUpdateCheck = 2610;
 				LastUpgradeCheck = 2610;
 				TargetAttributes = {
+					3A46CDFA2F40215800240ECA = {
+						CreatedOnToolsVersion = 26.1.1;
+						TestTargetID = 3A8C198F2F3DFBFE005DC215;
+					};
 					3A8C198F2F3DFBFE005DC215 = {
 						CreatedOnToolsVersion = 26.1.1;
 					};
@@ -100,11 +152,19 @@
 			projectRoot = "";
 			targets = (
 				3A8C198F2F3DFBFE005DC215 /* DiscogsClient */,
+				3A46CDFA2F40215800240ECA /* DiscogsClientTests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		3A46CDF92F40215800240ECA /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		3A8C198E2F3DFBFE005DC215 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -115,6 +175,13 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		3A46CDF72F40215800240ECA /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		3A8C198C2F3DFBFE005DC215 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -124,7 +191,57 @@
 		};
 /* End PBXSourcesBuildPhase section */
 
+/* Begin PBXTargetDependency section */
+		3A46CE002F40215800240ECA /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 3A8C198F2F3DFBFE005DC215 /* DiscogsClient */;
+			targetProxy = 3A46CDFF2F40215800240ECA /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
 /* Begin XCBuildConfiguration section */
+		3A46CE022F40215800240ECA /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 99FHZVWMRA;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.paulos.DiscogsClientTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/DiscogsClient.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/DiscogsClient";
+			};
+			name = Debug;
+		};
+		3A46CE032F40215800240ECA /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 99FHZVWMRA;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.paulos.DiscogsClientTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/DiscogsClient.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/DiscogsClient";
+			};
+			name = Release;
+		};
 		3A8C19992F3DFBFE005DC215 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -313,6 +430,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		3A46CE012F40215800240ECA /* Build configuration list for PBXNativeTarget "DiscogsClientTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				3A46CE022F40215800240ECA /* Debug */,
+				3A46CE032F40215800240ECA /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		3A8C198B2F3DFBFE005DC215 /* Build configuration list for PBXProject "DiscogsClient" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (

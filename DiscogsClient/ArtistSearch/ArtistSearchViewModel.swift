@@ -62,6 +62,7 @@ final class ArtistSearchViewModel: ObservableObject {
     }
     
     private func setSearchStarted(with query: String) {
+        hasSearched = true
         results = []
         errorMessage = nil
         isFirstLoading = true
