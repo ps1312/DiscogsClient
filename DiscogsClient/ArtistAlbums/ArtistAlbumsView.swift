@@ -27,9 +27,17 @@ struct ArtistAlbumsView: View {
             if viewModel.isFirstLoading && albums.isEmpty {
                 ProgressView()
             } else if albums.isEmpty, let errorMessage = viewModel.errorMessage {
-                Text(errorMessage)
-                    .foregroundStyle(.red)
-                    .font(.footnote)
+                ContentUnavailableView {
+                    Label {
+                        Text("Albums Failed")
+                    } icon: {
+                        Image(systemName: "exclamationmark.triangle")
+                            .symbolRenderingMode(.monochrome)
+                            .foregroundStyle(.red)
+                    }
+                } description: {
+                    Text(errorMessage)
+                }
             } else if albums.isEmpty {
                 VStack(spacing: 10) {
                     Image(systemName: "opticaldisc")

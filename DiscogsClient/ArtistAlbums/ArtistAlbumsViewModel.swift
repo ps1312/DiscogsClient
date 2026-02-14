@@ -63,17 +63,16 @@ final class ArtistAlbumsViewModel: ObservableObject {
             let (data, response) = try await client.send(request)
             let page = try ArtistAlbumsMapper.map(data, response)
 
-            guard page.currentPage == requestedPage else { return }
-
             let mergedAlbums = Self.mergeAlbums(existing: paginated.items, incoming: page.items)
                 .sorted(by: Self.albumSort)
+            
             paginated = Paginated(
                 items: mergedAlbums,
                 currentPage: page.currentPage,
                 totalPages: page.totalPages
             )
         } catch {
-            errorMessage = "Failed to load albums: \(error.localizedDescription)"
+            errorMessage = "Failed to load albums. Please try again later."
         }
     }
 

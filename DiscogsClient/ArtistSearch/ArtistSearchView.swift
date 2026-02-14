@@ -22,11 +22,17 @@ struct ArtistSearchView: View {
                     ProgressView()
                     Spacer()
                 } else if viewModel.paginated.items.isEmpty, let errorMessage = viewModel.errorMessage {
-                    ContentUnavailableView(
-                        "Search Failed",
-                        systemImage: "exclamationmark.triangle",
-                        description: Text(errorMessage)
-                    )
+                    ContentUnavailableView {
+                        Label {
+                            Text("Search Failed")
+                        } icon: {
+                            Image(systemName: "exclamationmark.triangle")
+                                .symbolRenderingMode(.monochrome)
+                                .foregroundStyle(.red)
+                        }
+                    } description: {
+                        Text(errorMessage)
+                    }
                 } else if viewModel.paginated.items.isEmpty, !viewModel.isFirstLoading, viewModel.errorMessage == nil {
                     if viewModel.hasSearched, !viewModel.trimmedSearchText.isEmpty {
                         NoResultsEmptyView(query: viewModel.trimmedSearchText)
