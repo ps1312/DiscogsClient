@@ -45,12 +45,12 @@ struct ArtistDetailView: View {
                 .buttonStyle(.borderedProminent)
                 .padding(.horizontal, 20)
 
-                if let members = viewModel.artist.bandMembers {
+                if let members = viewModel.orderedBandMembers {
                     VStack(alignment: .leading, spacing: 10) {
                         Text("Members")
                             .font(.headline)
 
-                        ForEach(Array(members.enumerated()), id: \.element.id) { index, member in
+                        ForEach(members) { member in
                             HStack(spacing: 10) {
                                 Image(systemName: "person.fill")
                                     .font(.caption)
@@ -88,10 +88,14 @@ struct ArtistDetailView: View {
                 }
 
                 if let errorMessage = viewModel.errorMessage {
-                    Text(errorMessage)
-                        .font(.footnote)
-                        .foregroundStyle(.red)
-                        .padding(.horizontal, 20)
+                    HStack {
+                        Spacer()
+                        Text(errorMessage)
+                            .font(.footnote)
+                            .foregroundStyle(.red)
+                            .padding(.horizontal, 20)
+                        Spacer()
+                    }
                 }
 
                 if viewModel.isLoadingArtist {

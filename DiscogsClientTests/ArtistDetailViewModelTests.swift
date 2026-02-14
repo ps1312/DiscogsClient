@@ -155,7 +155,7 @@ final class ArtistDetailViewModelTests: XCTestCase {
         XCTAssertFalse(sut.isLoadingArtist)
         XCTAssertEqual(
             sut.errorMessage,
-            "Failed to load artist details: request failed"
+            "Failed to load artist details. Please try again later."
         )
         XCTAssertEqual(sut.artist.id, 77)
         XCTAssertEqual(sut.artist.title, "Existing Artist")
@@ -196,6 +196,32 @@ final class ArtistDetailViewModelTests: XCTestCase {
         XCTAssertEqual(sut.artist.id, 88)
         XCTAssertEqual(sut.artist.profile, "Profile without members")
         XCTAssertNil(sut.artist.bandMembers)
+    }
+    
+    @MainActor
+    func test_orderedBandMembers_activeMembersComeFirst() async {
+        let existingArtist = Artist(
+            id: 42,
+            title: "Band",
+            thumbUrl: nil,
+            imageUrl: nil,
+            profile: nil,
+            bandMembers: [
+                BandMember(id: 1, name: "Inactive One", active: false),
+                BandMember(id: 2, name: "Active One", active: true),
+                BandMember(id: 3, name: "Inactive Two", active: false),
+                BandMember(id: 4, name: "Active Two", active: true)
+            ]
+        )
+        let sut = ArtistDetailViewModel(client: FakeHTTPClient(), existing: existingArtist)
+        
+        await sut.fetchArtistDetails()
+
+        XCTAssertEqual(
+            sut.orderedBandMembers?.map(\.name),
+            ["Active One", "Active Two", "Inactive One", "Inactive Two"]
+        )
+        XCTAssertEqual(sut.orderedBandMembers?.map(\.id), [2, 4, 1, 3])
     }
 }
 

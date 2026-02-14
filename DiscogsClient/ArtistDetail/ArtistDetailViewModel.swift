@@ -10,6 +10,16 @@ final class ArtistDetailViewModel: ObservableObject {
 
     private let client: HTTPClient
 
+    var orderedBandMembers: [BandMember]? {
+        guard let members = artist.bandMembers else {
+            return nil
+        }
+
+        let activeMembers = members.filter(\.active)
+        let inactiveMembers = members.filter { !$0.active }
+        return activeMembers + inactiveMembers
+    }
+
     init(client: HTTPClient, existing: Artist) {
         self.client = client
         self.artist = existing
@@ -32,7 +42,7 @@ final class ArtistDetailViewModel: ObservableObject {
             isLoadingArtist = false
         } catch {
             isLoadingArtist = false
-            errorMessage = "Failed to load artist details: \(error.localizedDescription)"
+            errorMessage = "Failed to load artist details. Please try again later."
         }
     }
 }
