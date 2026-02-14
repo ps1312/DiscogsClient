@@ -10,7 +10,7 @@ final class ArtistSearchViewModelTests: XCTestCase {
                 data: makeSearchPayload(
                     page: 1,
                     pages: 1,
-                    results: [SearchResultFixture(id: 1, title: "ABBA", thumb: nil)]
+                    results: [(id: 1, title: "ABBA", thumb: nil)]
                 ),
                 statusCode: 200
             )
@@ -38,7 +38,7 @@ final class ArtistSearchViewModelTests: XCTestCase {
                 data: makeSearchPayload(
                     page: 1,
                     pages: 2,
-                    results: [SearchResultFixture(id: 101, title: "Metallica", thumb: nil)]
+                    results: [(id: 101, title: "Metallica", thumb: nil)]
                 ),
                 statusCode: 200
             )
@@ -68,7 +68,7 @@ final class ArtistSearchViewModelTests: XCTestCase {
                 data: makeSearchPayload(
                     page: 1,
                     pages: 2,
-                    results: [SearchResultFixture(id: 1, title: "ABBA", thumb: nil)]
+                    results: [(id: 1, title: "ABBA", thumb: nil)]
                 ),
                 statusCode: 200
             ),
@@ -76,7 +76,7 @@ final class ArtistSearchViewModelTests: XCTestCase {
                 data: makeSearchPayload(
                     page: 2,
                     pages: 2,
-                    results: [SearchResultFixture(id: 2, title: "A-Teens", thumb: nil)]
+                    results: [(id: 2, title: "A-Teens", thumb: nil)]
                 ),
                 statusCode: 200
             )
@@ -106,7 +106,7 @@ final class ArtistSearchViewModelTests: XCTestCase {
                 data: makeSearchPayload(
                     page: 1,
                     pages: 1,
-                    results: [SearchResultFixture(id: 1, title: "ABBA", thumb: nil)]
+                    results: [(id: 1, title: "ABBA", thumb: nil)]
                 ),
                 statusCode: 200
             )
@@ -152,7 +152,7 @@ final class ArtistSearchViewModelTests: XCTestCase {
                 data: makeSearchPayload(
                     page: 1,
                     pages: 2,
-                    results: [SearchResultFixture(id: 1, title: "ABBA", thumb: nil)]
+                    results: [(id: 1, title: "ABBA", thumb: nil)]
                 ),
                 statusCode: 200
             ),
@@ -175,77 +175,34 @@ final class ArtistSearchViewModelTests: XCTestCase {
     }
 }
 
-private final class FakeHTTPClient: HTTPClient {
-    enum Response {
-        case success(data: Data, statusCode: Int)
-        case failure(Error)
-    }
-
-    var responses: [Response] = []
-    private(set) var requests: [URLRequest] = []
-
-    func send(_ request: URLRequest) async throws -> (Data, HTTPURLResponse) {
-        requests.append(request)
-
-        guard !responses.isEmpty else {
-            throw NSError(
-                domain: "FakeHTTPClient",
-                code: 0,
-                userInfo: [NSLocalizedDescriptionKey: "No stubbed response available"]
-            )
+private func makeSearchPayload(
+    page: Int,
+    pages: Int,
+    results: [(id: Int, title: String, thumb: String?)]
+) -> Data {
+    let resultObjects: [[String: Any]] = results.map { result in
+        var object: [String: Any] = [
+            "id": result.id,
+            "title": result.title,
+            "type": "artist"
+        ]
+        if let thumb = result.thumb {
+            object["thumb"] = thumb
         }
-
-        let response = responses.removeFirst()
-        switch response {
-        case let .success(data, statusCode):
-            let url = request.url ?? URL(string: "https://api.discogs.com")!
-            let httpResponse = HTTPURLResponse(
-                url: url,
-                statusCode: statusCode,
-                httpVersion: nil,
-                headerFields: nil
-            )!
-            return (data, httpResponse)
-        case let .failure(error):
-            throw error
-        }
-    }
-}
-
-private struct SearchResultFixture {
-    let id: Int
-    let title: String
-    let thumb: String?
-}
-
-private func makeSearchPayload(page: Int, pages: Int, results: [SearchResultFixture]) -> Data {
-    struct Pagination: Encodable {
-        let page: Int
-        let pages: Int
-        let per_page: Int
-        let items: Int
+        return object
     }
 
-    struct SearchResult: Encodable {
-        let id: Int
-        let title: String
-        let type: String
-        let thumb: String?
-    }
+    let payload: [String: Any] = [
+        "pagination": [
+            "page": page,
+            "pages": pages,
+            "per_page": 30,
+            "items": results.count
+        ],
+        "results": resultObjects
+    ]
 
-    struct Payload: Encodable {
-        let pagination: Pagination
-        let results: [SearchResult]
-    }
-
-    let payload = Payload(
-        pagination: Pagination(page: page, pages: pages, per_page: 30, items: results.count),
-        results: results.map {
-            SearchResult(id: $0.id, title: $0.title, type: "artist", thumb: $0.thumb)
-        }
-    )
-
-    return try! JSONEncoder().encode(payload)
+    return try! JSONSerialization.data(withJSONObject: payload)
 }
 
 private func queryValue(named name: String, in request: URLRequest) -> String? {
