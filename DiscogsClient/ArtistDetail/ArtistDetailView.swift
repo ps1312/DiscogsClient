@@ -26,23 +26,43 @@ struct ArtistDetailView: View {
                     .clipped()
                     .padding(.horizontal, 20)
 
-                VStack(alignment: .leading, spacing: 10) {
-                    detailRow(label: "Discogs ID", value: String(viewModel.artist.id))
-                    detailRow(label: "Type", value: "Artist")
-                }
-                .padding(.horizontal, 20)
-
                 NavigationLink {
                     makeArtistAlbumsView(viewModel.artist.id)
                         .navigationTitle("Albums")
                         .navigationBarTitleDisplayMode(.inline)
                 } label: {
-                    Label("View Albums", systemImage: "opticaldisc")
-                        .font(.subheadline.weight(.semibold))
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 10)
+                    HStack(spacing: 12) {
+                        Image(systemName: "opticaldisc")
+                            .font(.title3)
+                            .foregroundStyle(.white)
+                            .frame(width: 36, height: 36)
+                            .background(.blue, in: Circle())
+
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("View Albums")
+                                .font(.headline)
+                            Text("Browse releases and filters")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+
+                        Spacer(minLength: 0)
+
+                        Image(systemName: "chevron.right")
+                            .font(.caption.weight(.semibold))
+                            .foregroundStyle(.tertiary)
+                    }
+                    .padding(.horizontal, 14)
+                    .padding(.vertical, 12)
+                    .background(Color(uiColor: .secondarySystemBackground), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
                 }
-                .buttonStyle(.borderedProminent)
+                .buttonStyle(.plain)
+                .padding(.horizontal, 20)
+
+                VStack(alignment: .leading, spacing: 10) {
+                    detailRow(label: "Discogs ID", value: String(viewModel.artist.id))
+                    detailRow(label: "Type", value: "Artist")
+                }
                 .padding(.horizontal, 20)
 
                 if let members = viewModel.orderedBandMembers {
