@@ -119,6 +119,11 @@ struct ArtistSearchView: View {
 #Preview {
     ArtistSearchView(
         viewModel: ArtistSearchViewModel(client: URLSession.shared),
-        makeArtistDetailView: { ArtistDetailView(client: URLSession.shared, item: $0) }
+        makeArtistDetailView: {
+            ArtistDetailView(
+                viewModel: ArtistDetailViewModel(client: URLSession.shared, existing: $0),
+                makeArtistAlbumsView: { ArtistAlbumsView(client: URLSession.shared, artistID: $0) }
+            )
+        }
     )
 }

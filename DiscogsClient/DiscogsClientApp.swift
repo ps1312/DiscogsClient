@@ -15,7 +15,12 @@ struct DiscogsClientApp: App {
         WindowGroup {
             ArtistSearchView(
                 viewModel: ArtistSearchViewModel(client: client),
-                makeArtistDetailView: { ArtistDetailView(client: client, item: $0) }
+                makeArtistDetailView: { artist in
+                    ArtistDetailView(
+                        viewModel: ArtistDetailViewModel(client: client, existing: artist),
+                        makeArtistAlbumsView: { ArtistAlbumsView(client: client, artistID: $0) }
+                    )
+                }
             )
         }
     }
