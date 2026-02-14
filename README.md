@@ -71,7 +71,7 @@ This choice was made because it facilitates a lot when implementing unit tests, 
 ## Static Analysis
 
 - SwiftLint is configured through SPM. Run by building the project in Xcode.
-- Really useful for removing unused blank space and enforcing conventions, like: `var imageUrl: URL? in favor of var imageUrl: URL? = nil`
+- Really useful for removing unused blank space and enforcing conventions, like: `var imageUrl: URL?` in favor of `var imageUrl: URL? = nil`
 
 ## Project Structure
 
