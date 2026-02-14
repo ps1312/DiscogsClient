@@ -3,6 +3,82 @@ import XCTest
 
 final class ArtistDetailViewModelTests: XCTestCase {
     @MainActor
+    func test_fetchArtistDetailsIfNeeded_firstCall_fetchesDetails() async {
+        let existingArtist = Artist(
+            id: 42,
+            title: "Initial Name",
+            thumbUrl: URL(string: "https://img.example/thumb.jpg"),
+            imageUrl: nil,
+            profile: nil,
+            bandMembers: nil
+        )
+
+        let client = FakeHTTPClient()
+        client.responses = [
+            .success(
+                data: makeArtistDetailPayload(
+                    id: existingArtist.id,
+                    name: "Returned Name",
+                    profile: "Legendary artist profile",
+                    primaryImageURL: "https://img.example/primary.jpg",
+                    members: [(id: 1, name: "Member One", active: true)]
+                ),
+                statusCode: 200
+            )
+        ]
+
+        let sut = ArtistDetailViewModel(client: client, existing: existingArtist)
+
+        await sut.fetchArtistDetailsIfNeeded()
+
+        XCTAssertEqual(client.requests.count, 1)
+        XCTAssertTrue(sut.hasFetchedDetails)
+        XCTAssertNil(sut.errorMessage)
+    }
+
+    @MainActor
+    func test_fetchArtistDetailsIfNeeded_afterSuccess_doesNotFetchAgain() async {
+        let existingArtist = Artist(
+            id: 42,
+            title: "Initial Name",
+            thumbUrl: URL(string: "https://img.example/thumb.jpg"),
+            imageUrl: nil,
+            profile: nil,
+            bandMembers: nil
+        )
+
+        let client = FakeHTTPClient()
+        client.responses = [
+            .success(
+                data: makeArtistDetailPayload(
+                    id: existingArtist.id,
+                    name: "Returned Name",
+                    profile: "Legendary artist profile",
+                    primaryImageURL: "https://img.example/primary.jpg",
+                    members: [(id: 1, name: "Member One", active: true)]
+                ),
+                statusCode: 200
+            ),
+            .failure(
+                NSError(
+                    domain: "ArtistDetailViewModelTests",
+                    code: 99,
+                    userInfo: [NSLocalizedDescriptionKey: "should not be called"]
+                )
+            )
+        ]
+
+        let sut = ArtistDetailViewModel(client: client, existing: existingArtist)
+
+        await sut.fetchArtistDetailsIfNeeded()
+        await sut.fetchArtistDetailsIfNeeded()
+
+        XCTAssertEqual(client.requests.count, 1)
+        XCTAssertTrue(sut.hasFetchedDetails)
+        XCTAssertNil(sut.errorMessage)
+    }
+
+    @MainActor
     func test_fetchArtistDetails_success_updatesArtistFromResponse() async throws {
         let existingArtist = Artist(
             id: 42,

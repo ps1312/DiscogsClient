@@ -110,7 +110,7 @@ struct ArtistDetailView: View {
         .navigationTitle(viewModel.artist.title)
         .navigationBarTitleDisplayMode(.large)
         .task(id: viewModel.artist.id) {
-            await viewModel.fetchArtistDetails()
+            await viewModel.fetchArtistDetailsIfNeeded()
         }
     }
 
