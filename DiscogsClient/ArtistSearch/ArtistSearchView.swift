@@ -63,15 +63,6 @@ struct ArtistSearchView: View {
                                 }
                             }
 
-                            if viewModel.isLoadingMore {
-                                HStack {
-                                    Spacer()
-                                    ProgressView()
-                                    Spacer()
-                                }
-                                .padding()
-                            }
-
                             if let paginationErrorMessage = viewModel.paginationErrorMessage {
                                 HStack(spacing: 6) {
                                     Image(systemName: "exclamationmark.triangle.fill")
@@ -82,6 +73,15 @@ struct ArtistSearchView: View {
                                 .frame(maxWidth: .infinity, alignment: .center)
                                 .listRowSeparator(.hidden)
                             }
+                        }
+
+                        if viewModel.isLoadingMore {
+                            HStack {
+                                Spacer()
+                                ProgressView()
+                                Spacer()
+                            }
+                            .padding(.horizontal)
                         }
                     }
                 }
@@ -114,10 +114,6 @@ struct ArtistSearchView: View {
                 Text(artist.title)
                     .font(.headline)
                     .lineLimit(2)
-
-                Text("ID: \(artist.id)")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
             }
 
             Spacer(minLength: 0)

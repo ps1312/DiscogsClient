@@ -85,15 +85,6 @@ struct ArtistAlbumsView: View {
                             }
                         }
 
-                        if viewModel.isLoadingMore {
-                            HStack {
-                                Spacer()
-                                ProgressView()
-                                Spacer()
-                            }
-                            .padding()
-                        }
-
                         if let paginationErrorMessage = viewModel.paginationErrorMessage {
                             HStack(spacing: 6) {
                                 Image(systemName: "exclamationmark.triangle.fill")
@@ -106,6 +97,15 @@ struct ArtistAlbumsView: View {
                         }
                     }
                     .listRowSeparator(.hidden)
+
+                    if viewModel.isLoadingMore {
+                        HStack {
+                            Spacer()
+                            ProgressView()
+                            Spacer()
+                        }
+                        .padding(.horizontal)
+                    }
 
                     if let errorMessage = viewModel.errorMessage {
                         Text(errorMessage)
