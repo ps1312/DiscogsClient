@@ -46,7 +46,7 @@ final class ArtistSearchViewModel: ObservableObject {
             return
         }
 
-        setSearchStarted(with: query)
+        setSearchStarted(with: trimmedQuery)
 
         do {
             try await Task.sleep(nanoseconds: 500_000_000)
@@ -78,13 +78,13 @@ final class ArtistSearchViewModel: ObservableObject {
         currentQuery = ""
     }
     
-    private func setSearchStarted(with query: String) {
+    private func setSearchStarted(with committedQuery: String) {
         hasSearched = true
         paginated = Paginated(items: [], currentPage: 0, totalPages: 0)
         errorMessage = nil
         isFirstLoading = true
         isLoadingMore = false
-        currentQuery = query
+        currentQuery = committedQuery
     }
 
     private func loadPage(query: String, page requestedPage: Int) async {

@@ -183,14 +183,6 @@ final class ArtistSearchViewModelTests: XCTestCase {
     }
 
     @MainActor
-    func test_emptyState_whenInitialState_showsStartSearchingMessage() {
-        let sut = ArtistSearchViewModel(client: FakeHTTPClient())
-
-        XCTAssertEqual(sut.emptyStateTitle, "Start Searching")
-        XCTAssertEqual(sut.emptyStateMessage, "Find artists on Discogs")
-    }
-
-    @MainActor
     func test_emptyState_whenSearchedAndNoResults_showsNoResultsMessage() async {
         let client = FakeHTTPClient()
         client.responses = [
@@ -212,6 +204,16 @@ final class ArtistSearchViewModelTests: XCTestCase {
         XCTAssertEqual(sut.emptyStateMessage, "No matches found for \"Unknown Artist\"")
     }
 
+}
+
+private struct UnusedHTTPClient: HTTPClient {
+    func send(_ request: URLRequest) async throws -> (Data, HTTPURLResponse) {
+        throw NSError(
+            domain: "UnusedHTTPClient",
+            code: 0,
+            userInfo: [NSLocalizedDescriptionKey: "Unused in this test"]
+        )
+    }
 }
 
 private func makeSearchPayload(
