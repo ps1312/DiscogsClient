@@ -24,7 +24,7 @@ struct ArtistAlbumsFilterView: View {
             } label: {
                 filterChip(title: selectedYear.map(String.init) ?? "Year")
             }
-            .frame(width: 108)
+            .frame(maxWidth: .infinity)
 
             Menu {
                 Button("All Labels") { selectedLabel = nil }
@@ -34,18 +34,17 @@ struct ArtistAlbumsFilterView: View {
             } label: {
                 filterChip(title: selectedLabel ?? "Label")
             }
-            .frame(width: 124)
+            .frame(maxWidth: .infinity)
 
             Menu {
                 Button("All Genres") {}
             } label: {
                 filterChip(title: "Genre")
             }
-            .frame(width: 120)
+            .frame(maxWidth: .infinity)
             .disabled(true)
-
-            Spacer(minLength: 0)
         }
+        .frame(maxWidth: .infinity)
         .padding(.horizontal)
         .animation(.none, value: selectedYear)
         .animation(.none, value: selectedLabel)
