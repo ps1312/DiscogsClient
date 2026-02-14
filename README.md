@@ -82,3 +82,45 @@ This choice was made because it facilitates a lot when implementing unit tests, 
 - `DiscogsClientTests`: ViewModel unit tests
 - `endpoint.md`: JSON response contracts
 - `screenshots/`: UI screenshots
+
+## Screenshots
+
+### Search
+
+<p>
+  <img src="screenshots/search/initial_view.png" alt="Search - Initial View" width="30%">
+  <img src="screenshots/search/search_loading.png" alt="Search - Loading" width="30%">
+  <img src="screenshots/search/search_success.png" alt="Search - Success" width="30%">
+</p>
+<p>
+  <img src="screenshots/search/search_loading_error.png" alt="Search - Loading Error" width="30%">
+  <img src="screenshots/search/no_results_found.png" alt="Search - No Results" width="30%">
+  <img src="screenshots/search/pagination_loading.png" alt="Search - Pagination Loading" width="30%">
+</p>
+<p>
+  <img src="screenshots/search/pagination_loading_error.png" alt="Search - Pagination Loading Error" width="30%">
+</p>
+
+### Artist Details
+
+<p>
+  <img src="screenshots/details/artist_details_loading.png" alt="Artist Details - Loading" width="30%">
+  <img src="screenshots/details/artist_details_success.png" alt="Artist Details - Success" width="30%">
+  <img src="screenshots/details/artist_details_error.png" alt="Artist Details - Error" width="30%">
+</p>
+<p>
+  <img src="screenshots/details/artist_details_band_members.png" alt="Artist Details - Band Members" width="30%">
+</p>
+
+### Albums
+
+<p>
+  <img src="screenshots/albums/albums_loading.png" alt="Albums - Loading" width="30%">
+  <img src="screenshots/albums/albums_success.png" alt="Albums - Success" width="30%">
+  <img src="screenshots/albums/albums_loading_error.png" alt="Albums - Loading Error" width="30%">
+</p>
+<p>
+  <img src="screenshots/albums/albums_filtered.png" alt="Albums - Filtered" width="30%">
+  <img src="screenshots/albums/pagination_loading.png" alt="Albums - Pagination Loading" width="30%">
+  <img src="screenshots/albums/pagination_loading_error.png" alt="Albums - Pagination Loading Error" width="30%">
+</p>
