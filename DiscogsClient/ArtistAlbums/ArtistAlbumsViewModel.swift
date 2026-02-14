@@ -6,6 +6,7 @@ final class ArtistAlbumsViewModel: ObservableObject {
     @Published private(set) var isFirstLoading = false
     @Published private(set) var isLoadingMore = false
     @Published private(set) var errorMessage: String?
+    @Published private(set) var paginationErrorMessage: String?
     @Published private(set) var paginated = Paginated<ArtistRelease>(
         items: [],
         currentPage: 0,
@@ -38,6 +39,7 @@ final class ArtistAlbumsViewModel: ObservableObject {
         isFirstLoading = true
         isLoadingMore = false
         errorMessage = nil
+        paginationErrorMessage = nil
 
         await loadPage(page: 1, appending: false)
     }
@@ -48,6 +50,7 @@ final class ArtistAlbumsViewModel: ObservableObject {
 
         isLoadingMore = true
         errorMessage = nil
+        paginationErrorMessage = nil
 
         await loadPage(page: currentPage + 1, appending: true)
     }
@@ -65,6 +68,7 @@ final class ArtistAlbumsViewModel: ObservableObject {
 
             let mergedAlbums = Self.mergeAlbums(existing: paginated.items, incoming: page.items)
                 .sorted(by: Self.albumSort)
+            paginationErrorMessage = nil
             
             paginated = Paginated(
                 items: mergedAlbums,
@@ -72,7 +76,13 @@ final class ArtistAlbumsViewModel: ObservableObject {
                 totalPages: page.totalPages
             )
         } catch {
-            errorMessage = "Failed to load albums. Please try again later."
+            if requestedPage > 1, !paginated.items.isEmpty {
+                errorMessage = nil
+                paginationErrorMessage = "Couldn't load more results. Please try again later."
+            } else {
+                errorMessage = "Failed to load albums. Please try again later."
+                paginationErrorMessage = nil
+            }
         }
     }
 

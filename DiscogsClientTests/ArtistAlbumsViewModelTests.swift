@@ -26,6 +26,7 @@ final class ArtistAlbumsViewModelTests: XCTestCase {
         XCTAssertFalse(sut.isFirstLoading)
         XCTAssertFalse(sut.isLoadingMore)
         XCTAssertNil(sut.errorMessage)
+        XCTAssertNil(sut.paginationErrorMessage)
         XCTAssertEqual(client.requests.count, 1)
         XCTAssertEqual(queryValue(named: "page", in: client.requests[0]), "1")
     }
@@ -65,6 +66,7 @@ final class ArtistAlbumsViewModelTests: XCTestCase {
         XCTAssertEqual(client.requests.count, 2)
         XCTAssertEqual(queryValue(named: "page", in: client.requests[1]), "2")
         XCTAssertFalse(sut.isLoadingMore)
+        XCTAssertNil(sut.paginationErrorMessage)
     }
 
     @MainActor
@@ -169,7 +171,7 @@ final class ArtistAlbumsViewModelTests: XCTestCase {
     }
 
     @MainActor
-    func test_loadNextPage_failure_keepsExistingAlbumsAndSetsError() async {
+    func test_loadNextPage_failure_keepsExistingAlbumsAndSetsPaginationError() async {
         let client = FakeHTTPClient()
         client.responses = [
             .success(
@@ -197,10 +199,32 @@ final class ArtistAlbumsViewModelTests: XCTestCase {
         await sut.loadNextPage()
 
         XCTAssertEqual(sut.albums.map(\.id), [1])
-        XCTAssertEqual(
-            sut.errorMessage,
-            "Failed to load albums: next page failed"
-        )
+        XCTAssertNil(sut.errorMessage)
+        XCTAssertEqual(sut.paginationErrorMessage, "Couldn't load more results. Please try again later.")
+        XCTAssertFalse(sut.isLoadingMore)
+    }
+
+    @MainActor
+    func test_fetchAlbums_failure_setsTopLevelErrorAndClearsPaginationError() async {
+        let client = FakeHTTPClient()
+        client.responses = [
+            .failure(
+                NSError(
+                    domain: "ArtistAlbumsViewModelTests",
+                    code: 1,
+                    userInfo: [NSLocalizedDescriptionKey: "first page failed"]
+                )
+            )
+        ]
+
+        let sut = ArtistAlbumsViewModel(client: client, artistID: 77)
+
+        await sut.fetchAlbums()
+
+        XCTAssertTrue(sut.albums.isEmpty)
+        XCTAssertEqual(sut.errorMessage, "Failed to load albums. Please try again later.")
+        XCTAssertNil(sut.paginationErrorMessage)
+        XCTAssertFalse(sut.isFirstLoading)
         XCTAssertFalse(sut.isLoadingMore)
     }
 }

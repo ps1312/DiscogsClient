@@ -93,6 +93,17 @@ struct ArtistAlbumsView: View {
                             }
                             .padding()
                         }
+
+                        if let paginationErrorMessage = viewModel.paginationErrorMessage {
+                            HStack(spacing: 6) {
+                                Image(systemName: "exclamationmark.triangle.fill")
+                                Text(paginationErrorMessage)
+                            }
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                            .frame(maxWidth: .infinity, alignment: .center)
+                            .listRowSeparator(.hidden)
+                        }
                     }
                     .listRowSeparator(.hidden)
 
