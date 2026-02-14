@@ -15,12 +15,16 @@ struct ArtistDetailView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
-                AsyncImageWithFallback(url: viewModel.artist.imageUrl ?? viewModel.artist.thumbUrl)
-                    .frame(maxWidth: .infinity)
+                Color.clear
                     .frame(height: 250)
+                    .overlay {
+                        AsyncImageWithFallback(url: viewModel.artist.imageUrl ?? viewModel.artist.thumbUrl)
+                            .aspectRatio(contentMode: .fill)
+                    }
                     .background(Color(uiColor: .secondarySystemFill))
                     .clipShape(RoundedRectangle(cornerRadius: 12))
                     .clipped()
+                    .padding(.horizontal, 20)
 
                 VStack(alignment: .leading, spacing: 10) {
                     detailRow(label: "Discogs ID", value: String(viewModel.artist.id))
@@ -71,7 +75,7 @@ struct ArtistDetailView: View {
                     .padding(.horizontal, 20)
                 }
                 
-                if let profile = viewModel.artist.profile {
+                if let profile = viewModel.artist.profile, !profile.isEmpty {
                     VStack(alignment: .leading, spacing: 8) {
                         Text("Profile")
                             .font(.headline)
