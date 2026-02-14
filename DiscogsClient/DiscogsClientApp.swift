@@ -15,13 +15,21 @@ struct DiscogsClientApp: App {
         WindowGroup {
             ArtistSearchView(
                 viewModel: ArtistSearchViewModel(client: client),
-                makeArtistDetailView: { artist in
-                    ArtistDetailView(
-                        viewModel: ArtistDetailViewModel(client: client, existing: artist),
-                        makeArtistAlbumsView: { ArtistAlbumsView(client: client, artistID: $0) }
-                    )
-                }
+                makeArtistDetailView: makeArtistDetailView
             )
         }
+    }
+
+    private func makeArtistDetailView(_ artist: Artist) -> ArtistDetailView {
+        ArtistDetailView(
+            viewModel: ArtistDetailViewModel(client: client, existing: artist),
+            makeArtistAlbumsView: makeArtistAlbumsView
+        )
+    }
+
+    private func makeArtistAlbumsView(_ artistID: Int) -> ArtistAlbumsView {
+        ArtistAlbumsView(
+            viewModel: ArtistAlbumsViewModel(client: client, artistID: artistID)
+        )
     }
 }
