@@ -14,6 +14,7 @@ final class ArtistAlbumsViewModel: ObservableObject {
     )
 
     let artistID: Int
+    let selectedArtistName: String
 
     private let client: HTTPClient
 
@@ -29,9 +30,10 @@ final class ArtistAlbumsViewModel: ObservableObject {
         paginated.totalPages
     }
 
-    init(client: HTTPClient, artistID: Int) {
+    init(client: HTTPClient, artistID: Int, selectedArtistName: String = "") {
         self.client = client
         self.artistID = artistID
+        self.selectedArtistName = selectedArtistName
     }
 
     func fetchAlbums() async {
@@ -64,7 +66,11 @@ final class ArtistAlbumsViewModel: ObservableObject {
         do {
             let request = ApiRequestBuilder.artistReleases(for: artistID, page: requestedPage)
             let (data, response) = try await client.send(request)
-            let page = try ArtistAlbumsMapper.map(data, response)
+            let page = try ArtistAlbumsMapper.map(
+                data,
+                response,
+                selectedArtistName: selectedArtistName
+            )
 
             let mergedAlbums = Self.mergeAlbums(existing: paginated.items, incoming: page.items)
                 .sorted(by: Self.albumSort)
@@ -102,7 +108,8 @@ final class ArtistAlbumsViewModel: ObservableObject {
                 thumb: release.thumb ?? current.thumb,
                 format: release.format ?? current.format,
                 type: release.type ?? current.type,
-                label: release.label ?? current.label
+                label: release.label ?? current.label,
+                artist: release.artist ?? current.artist
             )
         }
 

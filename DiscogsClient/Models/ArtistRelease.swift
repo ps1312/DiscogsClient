@@ -8,6 +8,7 @@ struct ArtistRelease: Decodable, Identifiable {
     let format: String?
     let type: String?
     let label: String?
+    let artist: String?
 
     var thumbnailURL: URL? {
         guard let thumb, !thumb.isEmpty else { return nil }

@@ -27,9 +27,13 @@ struct DiscogsClientApp: App {
         )
     }
 
-    private func makeArtistAlbumsView(_ artistID: Int) -> ArtistAlbumsView {
+    private func makeArtistAlbumsView(_ artistID: Int, _ artistName: String) -> ArtistAlbumsView {
         ArtistAlbumsView(
-            viewModel: ArtistAlbumsViewModel(client: client, artistID: artistID)
+            viewModel: ArtistAlbumsViewModel(
+                client: client,
+                artistID: artistID,
+                selectedArtistName: artistName
+            )
         )
     }
 }

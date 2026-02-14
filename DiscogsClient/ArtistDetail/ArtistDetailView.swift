@@ -2,11 +2,11 @@ import SwiftUI
 
 struct ArtistDetailView: View {
     @StateObject private var viewModel: ArtistDetailViewModel
-    private let makeArtistAlbumsView: (Int) -> ArtistAlbumsView
+    private let makeArtistAlbumsView: (Int, String) -> ArtistAlbumsView
 
     init(
         viewModel: ArtistDetailViewModel,
-        makeArtistAlbumsView: @escaping (Int) -> ArtistAlbumsView
+        makeArtistAlbumsView: @escaping (Int, String) -> ArtistAlbumsView
     ) {
         _viewModel = StateObject(wrappedValue: viewModel)
         self.makeArtistAlbumsView = makeArtistAlbumsView
@@ -27,7 +27,7 @@ struct ArtistDetailView: View {
                     .padding(.horizontal, 20)
 
                 NavigationLink {
-                    makeArtistAlbumsView(viewModel.artist.id)
+                    makeArtistAlbumsView(viewModel.artist.id, viewModel.artist.title)
                         .navigationTitle("Albums")
                         .navigationBarTitleDisplayMode(.inline)
                 } label: {

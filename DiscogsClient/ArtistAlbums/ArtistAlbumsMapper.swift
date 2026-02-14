@@ -6,13 +6,20 @@ class ArtistAlbumsMapper {
         let releases: [ArtistRelease]
     }
 
-    static func map(_ data: Data, _ response: HTTPURLResponse) throws -> Paginated<ArtistRelease> {
+    static func map(
+        _ data: Data,
+        _ response: HTTPURLResponse,
+        selectedArtistName: String
+    ) throws -> Paginated<ArtistRelease> {
         let decoded = try JSONDecoder().decode(Root.self, from: data)
+        let selectedArtist = normalizedArtistName(selectedArtistName)
 
         let albums = decoded.releases.filter {
             let formatText = $0.format?.lowercased() ?? ""
             let typeText = $0.type?.lowercased() ?? ""
-            return formatText.contains("album") || typeText == "master"
+            let isAlbum = formatText.contains("album") || typeText == "master"
+            let artistName = normalizedArtistName($0.artist)
+            return isAlbum && artistName == selectedArtist
         }
 
         return Paginated(
@@ -20,5 +27,11 @@ class ArtistAlbumsMapper {
             currentPage: decoded.pagination.page,
             totalPages: decoded.pagination.pages
         )
+    }
+
+    private static func normalizedArtistName(_ name: String?) -> String {
+        let raw = (name ?? "").trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+        let pattern = #"\s*\(\d+\)$"#
+        return raw.replacingOccurrences(of: pattern, with: "", options: .regularExpression)
     }
 }
