@@ -89,6 +89,16 @@ struct ArtistDetailView: View {
                         .foregroundStyle(.red)
                         .padding(.horizontal, 20)
                 }
+
+                if viewModel.isLoadingArtist {
+                    HStack {
+                        Spacer()
+                        ProgressView()
+                        Spacer()
+                    }
+                    .padding(.horizontal, 20)
+                    .padding(.bottom, 12)
+                }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
         }

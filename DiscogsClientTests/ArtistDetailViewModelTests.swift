@@ -86,6 +86,41 @@ final class ArtistDetailViewModelTests: XCTestCase {
         XCTAssertEqual(sut.artist.profile, "Existing profile")
         XCTAssertEqual(sut.artist.bandMembers?.map(\.name), ["Existing Member"])
     }
+
+    @MainActor
+    func test_fetchArtistDetails_whenResponseHasNoBandMembers_setsBandMembersToNil() async {
+        let existingArtist = Artist(
+            id: 88,
+            title: "No Members Artist",
+            thumbUrl: URL(string: "https://img.example/thumb.jpg"),
+            imageUrl: nil,
+            profile: nil,
+            bandMembers: nil
+        )
+
+        let client = FakeHTTPClient()
+        client.responses = [
+            .success(
+                data: makeArtistDetailPayload(
+                    id: existingArtist.id,
+                    name: "No Members Artist",
+                    profile: "Profile without members",
+                    primaryImageURL: "https://img.example/primary.jpg",
+                    members: nil
+                ),
+                statusCode: 200
+            )
+        ]
+
+        let sut = ArtistDetailViewModel(client: client, existing: existingArtist)
+
+        await sut.fetchArtistDetails()
+
+        XCTAssertNil(sut.errorMessage)
+        XCTAssertEqual(sut.artist.id, 88)
+        XCTAssertEqual(sut.artist.profile, "Profile without members")
+        XCTAssertNil(sut.artist.bandMembers)
+    }
 }
 
 private func makeArtistDetailPayload(
@@ -93,21 +128,22 @@ private func makeArtistDetailPayload(
     name: String,
     profile: String?,
     primaryImageURL: String?,
-    members: [(id: Int, name: String, active: Bool)]
+    members: [(id: Int, name: String, active: Bool)]?
 ) -> Data {
-    let memberPayloads: [[String: Any]] = members.map { member in
-        [
-            "id": member.id,
-            "name": member.name,
-            "active": member.active
-        ]
-    }
-
     var payload: [String: Any] = [
         "id": id,
-        "name": name,
-        "members": memberPayloads
+        "name": name
     ]
+
+    if let members {
+        payload["members"] = members.map { member in
+            [
+                "id": member.id,
+                "name": member.name,
+                "active": member.active
+            ]
+        }
+    }
 
     if let profile {
         payload["profile"] = profile
