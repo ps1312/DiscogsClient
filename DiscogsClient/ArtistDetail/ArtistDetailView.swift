@@ -133,7 +133,10 @@ struct ArtistDetailView: View {
             }
             .frame(maxWidth: .infinity, alignment: .leading)
         }
-        .background(Color.black)
+        .background {
+            Color(uiColor: .systemBackground)
+                .ignoresSafeArea()
+        }
         .navigationTitle(viewModel.artist.title)
         .navigationBarTitleDisplayMode(.large)
         .task(id: viewModel.artist.id) {
