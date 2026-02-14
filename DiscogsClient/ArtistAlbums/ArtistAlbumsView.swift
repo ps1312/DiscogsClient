@@ -1,26 +1,26 @@
 import SwiftUI
 
 struct ArtistAlbumsView: View {
-    let client: HTTPClient
-    let artistID: Int
+    @StateObject private var viewModel: ArtistAlbumsViewModel
 
-    @State private var albums: [ArtistRelease] = []
-    @State private var isLoading = false
-    @State private var errorMessage: String?
     @State private var selectedYear: Int?
     @State private var selectedGenre: String?
     @State private var selectedLabel: String?
 
+    init(viewModel: ArtistAlbumsViewModel) {
+        _viewModel = StateObject(wrappedValue: viewModel)
+    }
+
     private var availableYears: [Int] {
-        Array(Set(albums.compactMap(\.year))).sorted(by: >)
+        Array(Set(viewModel.albums.compactMap(\.year))).sorted(by: >)
     }
 
     private var availableLabels: [String] {
-        Array(Set(albums.compactMap(\.label))).sorted()
+        Array(Set(viewModel.albums.compactMap(\.label))).sorted()
     }
 
     private var filteredAlbums: [ArtistRelease] {
-        albums.filter { release in
+        viewModel.albums.filter { release in
             let matchesYear = selectedYear == nil || release.year == selectedYear
             let matchesLabel = selectedLabel == nil || release.label == selectedLabel
             return matchesYear && matchesLabel
@@ -29,13 +29,13 @@ struct ArtistAlbumsView: View {
 
     var body: some View {
         Group {
-            if isLoading {
+            if viewModel.isLoading {
                 ProgressView()
-            } else if let errorMessage {
+            } else if let errorMessage = viewModel.errorMessage {
                 Text(errorMessage)
                     .foregroundStyle(.red)
                     .font(.footnote)
-            } else if albums.isEmpty {
+            } else if viewModel.albums.isEmpty {
                 VStack(spacing: 10) {
                     Image(systemName: "opticaldisc")
                         .font(.system(size: 44, weight: .light))
@@ -76,8 +76,11 @@ struct ArtistAlbumsView: View {
                 }
             }
         }
-        .task(id: artistID) {
-            await fetchAlbums()
+        .task(id: viewModel.artistID) {
+            await viewModel.fetchAlbums()
+            selectedYear = nil
+            selectedGenre = nil
+            selectedLabel = nil
         }
     }
 
@@ -130,32 +133,5 @@ struct ArtistAlbumsView: View {
             parts.append(label)
         }
         return parts.joined(separator: " • ")
-    }
-
-    private func fetchAlbums() async {
-        await MainActor.run {
-            isLoading = true
-            errorMessage = nil
-            albums = []
-        }
-        
-        do {
-            let request = ApiRequestBuilder.artistReleases(for: artistID)
-            let (data, response) = try await client.send(request)
-            let filteredAlbums = try ArtistAlbumsMapper.map(data, response)
-
-            await MainActor.run {
-                albums = filteredAlbums
-                selectedYear = nil
-                selectedGenre = nil
-                selectedLabel = nil
-                isLoading = false
-            }
-        } catch {
-            await MainActor.run {
-                isLoading = false
-                errorMessage = "Failed to load albums: \(error.localizedDescription)"
-            }
-        }
     }
 }
