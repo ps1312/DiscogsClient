@@ -19,10 +19,14 @@ final class ArtistSearchViewModelTests: XCTestCase {
 
         await sut.searchDebounced(query: "ABBA")
         XCTAssertEqual(client.requests.count, 1)
+        XCTAssertEqual(sut.searchText, "ABBA")
+        XCTAssertEqual(sut.trimmedSearchText, "ABBA")
 
         await sut.searchDebounced(query: "   ")
 
         XCTAssertEqual(client.requests.count, 1)
+        XCTAssertEqual(sut.searchText, "   ")
+        XCTAssertEqual(sut.trimmedSearchText, "")
         XCTAssertTrue(sut.paginated.items.isEmpty)
         XCTAssertFalse(sut.hasSearched)
         XCTAssertFalse(sut.isFirstLoading)
@@ -30,8 +34,6 @@ final class ArtistSearchViewModelTests: XCTestCase {
         XCTAssertNil(sut.errorMessage)
         XCTAssertEqual(sut.paginated.currentPage, 0)
         XCTAssertEqual(sut.paginated.totalPages, 0)
-        XCTAssertEqual(sut.emptyStateTitle, "Start Searching")
-        XCTAssertEqual(sut.emptyStateMessage, "Find artists on Discogs")
     }
 
     @MainActor
@@ -51,6 +53,8 @@ final class ArtistSearchViewModelTests: XCTestCase {
 
         await sut.searchDebounced(query: "  Metallica  ")
 
+        XCTAssertEqual(sut.searchText, "  Metallica  ")
+        XCTAssertEqual(sut.trimmedSearchText, "Metallica")
         XCTAssertEqual(sut.paginated.items.map(\.id), [101])
         XCTAssertEqual(sut.paginated.items.first?.title, "Metallica")
         XCTAssertTrue(sut.hasSearched)
@@ -90,6 +94,8 @@ final class ArtistSearchViewModelTests: XCTestCase {
         let sut = ArtistSearchViewModel(client: client)
 
         await sut.searchDebounced(query: "ABBA")
+        XCTAssertEqual(sut.searchText, "ABBA")
+        XCTAssertEqual(sut.trimmedSearchText, "ABBA")
         await sut.loadNextPage()
 
         XCTAssertEqual(sut.paginated.items.map(\.id), [1, 2])
@@ -122,6 +128,8 @@ final class ArtistSearchViewModelTests: XCTestCase {
         let sut = ArtistSearchViewModel(client: client)
 
         await sut.searchDebounced(query: "ABBA")
+        XCTAssertEqual(sut.searchText, "ABBA")
+        XCTAssertEqual(sut.trimmedSearchText, "ABBA")
         await sut.loadNextPage()
 
         XCTAssertEqual(client.requests.count, 1)
@@ -145,11 +153,14 @@ final class ArtistSearchViewModelTests: XCTestCase {
 
         await sut.searchDebounced(query: "ABBA")
 
+        XCTAssertEqual(sut.searchText, "ABBA")
+        XCTAssertEqual(sut.trimmedSearchText, "ABBA")
         XCTAssertTrue(sut.paginated.items.isEmpty)
         XCTAssertTrue(sut.hasSearched)
         XCTAssertFalse(sut.isFirstLoading)
         XCTAssertFalse(sut.isLoadingMore)
-        XCTAssertEqual(sut.errorMessage, "network failed")
+        XCTAssertEqual(sut.errorMessage, "Error loading search results. Please try again later.")
+        XCTAssertNil(sut.paginationErrorMessage)
     }
 
     @MainActor
@@ -175,15 +186,18 @@ final class ArtistSearchViewModelTests: XCTestCase {
         let sut = ArtistSearchViewModel(client: client)
 
         await sut.searchDebounced(query: "ABBA")
+        XCTAssertEqual(sut.searchText, "ABBA")
+        XCTAssertEqual(sut.trimmedSearchText, "ABBA")
         await sut.loadNextPage()
 
         XCTAssertEqual(sut.paginated.items.map(\.id), [1])
         XCTAssertFalse(sut.isLoadingMore)
-        XCTAssertEqual(sut.errorMessage, "next page failed")
+        XCTAssertNil(sut.errorMessage)
+        XCTAssertEqual(sut.paginationErrorMessage, "Couldn't load more results. Please try again later.")
     }
 
     @MainActor
-    func test_emptyState_whenSearchedAndNoResults_showsNoResultsMessage() async {
+    func test_searchDebounced_whenSearchedAndNoResults_keepsTrimmedSearchText() async {
         let client = FakeHTTPClient()
         client.responses = [
             .success(
@@ -196,12 +210,14 @@ final class ArtistSearchViewModelTests: XCTestCase {
             )
         ]
         let sut = ArtistSearchViewModel(client: client)
-        sut.searchText = "Unknown Artist"
+        sut.searchText = "should be replaced by query"
 
-        await sut.searchDebounced(query: sut.searchText)
+        await sut.searchDebounced(query: "  Unknown Artist  ")
 
-        XCTAssertEqual(sut.emptyStateTitle, "No Results")
-        XCTAssertEqual(sut.emptyStateMessage, "No matches found for \"Unknown Artist\"")
+        XCTAssertTrue(sut.hasSearched)
+        XCTAssertTrue(sut.paginated.items.isEmpty)
+        XCTAssertEqual(sut.searchText, "  Unknown Artist  ")
+        XCTAssertEqual(sut.trimmedSearchText, "Unknown Artist")
     }
 
 }

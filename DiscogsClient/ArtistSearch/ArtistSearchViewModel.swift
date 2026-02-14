@@ -13,25 +13,14 @@ final class ArtistSearchViewModel: ObservableObject {
         totalPages: 0
     )
     @Published private(set) var errorMessage: String?
+    @Published private(set) var paginationErrorMessage: String?
     @Published private(set) var hasSearched = false
 
     private let client: HTTPClient
     private var currentQuery: String = ""
-
-    var emptyStateTitle: String {
-        if hasSearched && !trimmedSearchText.isEmpty {
-            return "No Results"
-        }
-
-        return "Start Searching"
-    }
-
-    var emptyStateMessage: String {
-        if hasSearched && !trimmedSearchText.isEmpty {
-            return "No matches found for \"\(trimmedSearchText)\""
-        }
-
-        return "Find artists on Discogs"
+    
+    var trimmedSearchText: String {
+        searchText.trimmingCharacters(in: .whitespacesAndNewlines)
     }
 
     init(client: HTTPClient) {
@@ -39,7 +28,8 @@ final class ArtistSearchViewModel: ObservableObject {
     }
 
     func searchDebounced(query: String) async {
-        let trimmedQuery = query.trimmingCharacters(in: .whitespacesAndNewlines)
+        searchText = query
+        let trimmedQuery = trimmedSearchText
 
         guard !trimmedQuery.isEmpty else {
             setSearchIsEmpty()
@@ -64,6 +54,7 @@ final class ArtistSearchViewModel: ObservableObject {
         isFirstLoading = false
         isLoadingMore = true
         errorMessage = nil
+        paginationErrorMessage = nil
         
         let nextPage = paginated.currentPage + 1
         await loadPage(query: currentQuery, page: nextPage)
@@ -73,6 +64,7 @@ final class ArtistSearchViewModel: ObservableObject {
         hasSearched = false
         paginated = Paginated(items: [], currentPage: 0, totalPages: 0)
         errorMessage = nil
+        paginationErrorMessage = nil
         isFirstLoading = false
         isLoadingMore = false
         currentQuery = ""
@@ -82,6 +74,7 @@ final class ArtistSearchViewModel: ObservableObject {
         hasSearched = true
         paginated = Paginated(items: [], currentPage: 0, totalPages: 0)
         errorMessage = nil
+        paginationErrorMessage = nil
         isFirstLoading = true
         isLoadingMore = false
         currentQuery = committedQuery
@@ -95,6 +88,7 @@ final class ArtistSearchViewModel: ObservableObject {
 
             isFirstLoading = false
             isLoadingMore = false
+            paginationErrorMessage = nil
             paginated = Paginated(
                 items: paginated.items + page.items,
                 currentPage: page.currentPage,
@@ -107,7 +101,14 @@ final class ArtistSearchViewModel: ObservableObject {
 
             isFirstLoading = false
             isLoadingMore = false
-            errorMessage = error.localizedDescription
+            
+            if requestedPage > 1, !paginated.items.isEmpty {
+                errorMessage = nil
+                paginationErrorMessage = "Couldn't load more results. Please try again later."
+            } else {
+                errorMessage = "Error loading search results. Please try again later."
+                paginationErrorMessage = nil
+            }
         }
     }
 
@@ -118,9 +119,5 @@ final class ArtistSearchViewModel: ObservableObject {
 
         let nsError = error as NSError
         return nsError.domain == NSURLErrorDomain && nsError.code == NSURLErrorCancelled
-    }
-
-    private var trimmedSearchText: String {
-        searchText.trimmingCharacters(in: .whitespacesAndNewlines)
     }
 }

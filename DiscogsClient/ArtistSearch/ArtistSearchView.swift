@@ -28,11 +28,11 @@ struct ArtistSearchView: View {
                         description: Text(errorMessage)
                     )
                 } else if viewModel.paginated.items.isEmpty, !viewModel.isFirstLoading, viewModel.errorMessage == nil {
-                    ContentUnavailableView(
-                        viewModel.emptyStateTitle,
-                        systemImage: "magnifyingglass",
-                        description: Text(viewModel.emptyStateMessage)
-                    )
+                    if viewModel.hasSearched, !viewModel.trimmedSearchText.isEmpty {
+                        NoResultsEmptyView(query: viewModel.trimmedSearchText)
+                    } else {
+                        InitialSearchEmptyView()
+                    }
                 } else {
                     VStack(spacing: 0) {
                         HStack {
@@ -64,6 +64,17 @@ struct ArtistSearchView: View {
                                     Spacer()
                                 }
                                 .padding()
+                            }
+
+                            if let paginationErrorMessage = viewModel.paginationErrorMessage {
+                                HStack(spacing: 6) {
+                                    Image(systemName: "exclamationmark.triangle.fill")
+                                    Text(paginationErrorMessage)
+                                }
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                                .frame(maxWidth: .infinity, alignment: .center)
+                                .listRowSeparator(.hidden)
                             }
                         }
                     }
@@ -107,4 +118,26 @@ struct ArtistSearchView: View {
         }
     }
 
+}
+
+private struct InitialSearchEmptyView: View {
+    var body: some View {
+        ContentUnavailableView(
+            "Start Searching",
+            systemImage: "magnifyingglass",
+            description: Text("Find artists on Discogs")
+        )
+    }
+}
+
+private struct NoResultsEmptyView: View {
+    let query: String
+
+    var body: some View {
+        ContentUnavailableView(
+            "No Results",
+            systemImage: "magnifyingglass",
+            description: Text("No matches found for \"\(query)\"")
+        )
+    }
 }
