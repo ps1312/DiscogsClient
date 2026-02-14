@@ -23,13 +23,13 @@ final class ArtistSearchViewModelTests: XCTestCase {
         await sut.searchDebounced(query: "   ")
 
         XCTAssertEqual(client.requests.count, 1)
-        XCTAssertTrue(sut.results.isEmpty)
+        XCTAssertTrue(sut.paginated.items.isEmpty)
         XCTAssertFalse(sut.hasSearched)
         XCTAssertFalse(sut.isFirstLoading)
         XCTAssertFalse(sut.isLoadingMore)
         XCTAssertNil(sut.errorMessage)
-        XCTAssertEqual(sut.currentPage, 0)
-        XCTAssertEqual(sut.totalPages, 0)
+        XCTAssertEqual(sut.paginated.currentPage, 0)
+        XCTAssertEqual(sut.paginated.totalPages, 0)
     }
 
     @MainActor
@@ -49,14 +49,14 @@ final class ArtistSearchViewModelTests: XCTestCase {
 
         await sut.searchDebounced(query: "  Metallica  ")
 
-        XCTAssertEqual(sut.results.map(\.id), [101])
-        XCTAssertEqual(sut.results.first?.title, "Metallica")
+        XCTAssertEqual(sut.paginated.items.map(\.id), [101])
+        XCTAssertEqual(sut.paginated.items.first?.title, "Metallica")
         XCTAssertTrue(sut.hasSearched)
         XCTAssertFalse(sut.isFirstLoading)
         XCTAssertFalse(sut.isLoadingMore)
         XCTAssertNil(sut.errorMessage)
-        XCTAssertEqual(sut.currentPage, 1)
-        XCTAssertEqual(sut.totalPages, 2)
+        XCTAssertEqual(sut.paginated.currentPage, 1)
+        XCTAssertEqual(sut.paginated.totalPages, 2)
         XCTAssertEqual(client.requests.count, 1)
         
         let firstRequest = try XCTUnwrap(client.requests.first)
@@ -90,12 +90,12 @@ final class ArtistSearchViewModelTests: XCTestCase {
         await sut.searchDebounced(query: "ABBA")
         await sut.loadNextPage()
 
-        XCTAssertEqual(sut.results.map(\.id), [1, 2])
-        XCTAssertEqual(sut.results.map(\.title), ["ABBA", "A-Teens"])
-        XCTAssertEqual(sut.results.first?.id, 1)
-        XCTAssertEqual(sut.results.last?.id, 2)
-        XCTAssertEqual(sut.currentPage, 2)
-        XCTAssertEqual(sut.totalPages, 2)
+        XCTAssertEqual(sut.paginated.items.map(\.id), [1, 2])
+        XCTAssertEqual(sut.paginated.items.map(\.title), ["ABBA", "A-Teens"])
+        XCTAssertEqual(sut.paginated.items.first?.id, 1)
+        XCTAssertEqual(sut.paginated.items.last?.id, 2)
+        XCTAssertEqual(sut.paginated.currentPage, 2)
+        XCTAssertEqual(sut.paginated.totalPages, 2)
         XCTAssertEqual(client.requests.count, 2)
 
         let secondRequest = try XCTUnwrap(client.requests.last)
@@ -123,7 +123,7 @@ final class ArtistSearchViewModelTests: XCTestCase {
         await sut.loadNextPage()
 
         XCTAssertEqual(client.requests.count, 1)
-        XCTAssertEqual(sut.results.map(\.id), [1])
+        XCTAssertEqual(sut.paginated.items.map(\.id), [1])
         XCTAssertFalse(sut.isLoadingMore)
     }
 
@@ -143,7 +143,7 @@ final class ArtistSearchViewModelTests: XCTestCase {
 
         await sut.searchDebounced(query: "ABBA")
 
-        XCTAssertTrue(sut.results.isEmpty)
+        XCTAssertTrue(sut.paginated.items.isEmpty)
         XCTAssertTrue(sut.hasSearched)
         XCTAssertFalse(sut.isFirstLoading)
         XCTAssertFalse(sut.isLoadingMore)
@@ -175,7 +175,7 @@ final class ArtistSearchViewModelTests: XCTestCase {
         await sut.searchDebounced(query: "ABBA")
         await sut.loadNextPage()
 
-        XCTAssertEqual(sut.results.map(\.id), [1])
+        XCTAssertEqual(sut.paginated.items.map(\.id), [1])
         XCTAssertFalse(sut.isLoadingMore)
         XCTAssertEqual(sut.errorMessage, "next page failed")
     }

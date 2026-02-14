@@ -13,25 +13,12 @@ class ArtistSearchMapper {
         }
     }
     
-    private struct PageMetadata: Decodable {
-        let page: Int
-        let pages: Int
-        let per_page: Int
-        let items: Int
-    }
-    
     private struct Root: Decodable {
-        let pagination: PageMetadata
+        let pagination: DiscogsPageMetadata
         let results: [DiscogsArtistSearchResult]
     }
 
-    struct PaginatedArtists {
-        let artists: [Artist]
-        let page: Int
-        let pages: Int
-    }
-
-    static func map(_ data: Data, _ response: HTTPURLResponse) throws -> PaginatedArtists {
+    static func map(_ data: Data, _ response: HTTPURLResponse) throws -> Paginated<Artist> {
         let decoded = try JSONDecoder().decode(Root.self, from: data)
         let models = decoded.results.map {
             Artist(
@@ -43,10 +30,10 @@ class ArtistSearchMapper {
                 bandMembers: nil
             )
         }
-        return PaginatedArtists(
-            artists: models,
-            page: decoded.pagination.page,
-            pages: decoded.pagination.pages
+        return Paginated(
+            items: models,
+            currentPage: decoded.pagination.page,
+            totalPages: decoded.pagination.pages
         )
     }
 }

@@ -17,11 +17,11 @@ struct ArtistSearchView: View {
     var body: some View {
         NavigationStack {
             VStack {
-                if viewModel.isFirstLoading, viewModel.results.isEmpty {
+                if viewModel.isFirstLoading, viewModel.paginated.items.isEmpty {
                     Spacer()
                     ProgressView()
                     Spacer()
-                } else if viewModel.results.isEmpty, !viewModel.isFirstLoading, viewModel.errorMessage == nil {
+                } else if viewModel.paginated.items.isEmpty, !viewModel.isFirstLoading, viewModel.errorMessage == nil {
                     Spacer()
                     VStack(spacing: 10) {
                         Image(systemName: "magnifyingglass")
@@ -42,7 +42,7 @@ struct ArtistSearchView: View {
                     VStack(spacing: 0) {
                         HStack {
                             Spacer()
-                            Text("Page \(viewModel.currentPage) / \(viewModel.totalPages)")
+                            Text("Page \(viewModel.paginated.currentPage) / \(viewModel.paginated.totalPages)")
                                 .font(.caption)
                                 .foregroundStyle(.secondary)
                                 .padding(.horizontal, 16)
@@ -50,14 +50,14 @@ struct ArtistSearchView: View {
                         }
 
                         List {
-                            ForEach(viewModel.results) { artist in
+                            ForEach(viewModel.paginated.items) { artist in
                                 NavigationLink {
                                     makeArtistDetailView(artist)
                                 } label: {
                                     listItemRow(for: artist)
                                 }
                                 .onAppear {
-                                    guard artist.id == viewModel.results.last?.id else { return }
+                                    guard artist.id == viewModel.paginated.items.last?.id else { return }
                                     Task { await viewModel.loadNextPage() }
                                 }
                             }
@@ -141,18 +141,3 @@ struct ArtistSearchView: View {
     }
 }
 
-#Preview {
-    ArtistSearchView(
-        viewModel: ArtistSearchViewModel(client: URLSession.shared),
-        makeArtistDetailView: {
-            ArtistDetailView(
-                viewModel: ArtistDetailViewModel(client: URLSession.shared, existing: $0),
-                makeArtistAlbumsView: {
-                    ArtistAlbumsView(
-                        viewModel: ArtistAlbumsViewModel(client: URLSession.shared, artistID: $0)
-                    )
-                }
-            )
-        }
-    )
-}

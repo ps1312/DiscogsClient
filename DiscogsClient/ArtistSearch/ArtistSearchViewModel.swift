@@ -5,13 +5,15 @@ import Combine
 final class ArtistSearchViewModel: ObservableObject {
     @Published var searchText = ""
     
-    @Published private(set) var results: [Artist] = []
     @Published private(set) var isFirstLoading = false
     @Published private(set) var isLoadingMore = false
+    @Published private(set) var paginated = Paginated<Artist>(
+        items: [],
+        currentPage: 0,
+        totalPages: 0
+    )
     @Published private(set) var errorMessage: String?
     @Published private(set) var hasSearched = false
-    @Published private(set) var currentPage = 0
-    @Published private(set) var totalPages = 0
 
     private let client: HTTPClient
     private var currentQuery: String = ""
@@ -36,63 +38,52 @@ final class ArtistSearchViewModel: ObservableObject {
             return
         }
 
-        await loadPage(query: trimmedQuery, page: 1, appending: false)
+        await loadPage(query: trimmedQuery, page: 1)
     }
 
     func loadNextPage() async {
         guard !isFirstLoading, !isLoadingMore else { return }
-        guard currentPage < totalPages else { return }
+        guard paginated.currentPage < paginated.totalPages else { return }
 
         isFirstLoading = false
         isLoadingMore = true
         errorMessage = nil
         
-        let nextPage = currentPage + 1
-        await loadPage(query: currentQuery, page: nextPage, appending: true)
+        let nextPage = paginated.currentPage + 1
+        await loadPage(query: currentQuery, page: nextPage)
     }
     
     private func setSearchIsEmpty() {
         hasSearched = false
-        results = []
+        paginated = Paginated(items: [], currentPage: 0, totalPages: 0)
         errorMessage = nil
         isFirstLoading = false
         isLoadingMore = false
         currentQuery = ""
-        resetPagination()
     }
     
     private func setSearchStarted(with query: String) {
         hasSearched = true
-        results = []
+        paginated = Paginated(items: [], currentPage: 0, totalPages: 0)
         errorMessage = nil
         isFirstLoading = true
         isLoadingMore = false
         currentQuery = query
-        resetPagination()
     }
 
-    private func resetPagination() {
-        currentPage = 0
-        totalPages = 0
-    }
-
-    private func loadPage(query: String, page requestedPage: Int, appending: Bool) async {
+    private func loadPage(query: String, page requestedPage: Int) async {
         do {
             let request = ApiRequestBuilder.search(query: query, page: requestedPage)
             let (data, response) = try await client.send(request)
             let page = try ArtistSearchMapper.map(data, response)
 
-            guard page.page == requestedPage else {
-                isFirstLoading = false
-                isLoadingMore = false
-                return
-            }
-
-            currentPage = page.page
-            totalPages = page.pages
-            results.append(contentsOf: page.artists)
             isFirstLoading = false
             isLoadingMore = false
+            paginated = Paginated(
+                items: paginated.items + page.items,
+                currentPage: page.currentPage,
+                totalPages: page.totalPages
+            )
         } catch {
             isFirstLoading = false
             isLoadingMore = false
