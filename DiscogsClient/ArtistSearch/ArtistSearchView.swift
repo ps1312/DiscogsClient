@@ -1,13 +1,15 @@
 import SwiftUI
 
 struct ArtistSearchView: View {
-    private let client: HTTPClient
-
     @ObservedObject private var viewModel: ArtistSearchViewModel
+    private let makeArtistDetailView: (Artist) -> ArtistDetailView
     
-    init(httpClient: HTTPClient, viewModel: ArtistSearchViewModel) {
-        self.client = httpClient
+    init(
+        viewModel: ArtistSearchViewModel,
+        makeArtistDetailView: @escaping (Artist) -> ArtistDetailView
+    ) {
         self.viewModel = viewModel
+        self.makeArtistDetailView = makeArtistDetailView
     }
 
     var body: some View {
@@ -38,7 +40,7 @@ struct ArtistSearchView: View {
                     List {
                         ForEach(viewModel.results) { artist in
                             NavigationLink {
-                                ArtistDetailView(client: client, item: artist)
+                                makeArtistDetailView(artist)
                             } label: {
                                 listItemRow(for: artist)
                             }
@@ -116,7 +118,7 @@ struct ArtistSearchView: View {
 
 #Preview {
     ArtistSearchView(
-        httpClient: URLSession.shared,
-        viewModel: ArtistSearchViewModel(client: URLSession.shared)
+        viewModel: ArtistSearchViewModel(client: URLSession.shared),
+        makeArtistDetailView: { ArtistDetailView(client: URLSession.shared, item: $0) }
     )
 }

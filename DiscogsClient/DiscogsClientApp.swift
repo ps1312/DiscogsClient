@@ -9,11 +9,13 @@ import SwiftUI
 
 @main
 struct DiscogsClientApp: App {
+    private let client: HTTPClient = URLSession.shared
+
     var body: some Scene {
         WindowGroup {
             ArtistSearchView(
-                httpClient: URLSession.shared,
-                viewModel: ArtistSearchViewModel(client: URLSession.shared)
+                viewModel: ArtistSearchViewModel(client: client),
+                makeArtistDetailView: { ArtistDetailView(client: client, item: $0) }
             )
         }
     }
