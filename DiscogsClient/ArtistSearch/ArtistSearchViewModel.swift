@@ -18,6 +18,22 @@ final class ArtistSearchViewModel: ObservableObject {
     private let client: HTTPClient
     private var currentQuery: String = ""
 
+    var emptyStateTitle: String {
+        if hasSearched && !trimmedSearchText.isEmpty {
+            return "No Results"
+        }
+
+        return "Start Searching"
+    }
+
+    var emptyStateMessage: String {
+        if hasSearched && !trimmedSearchText.isEmpty {
+            return "No matches found for \"\(trimmedSearchText)\""
+        }
+
+        return "Find artists on Discogs"
+    }
+
     init(client: HTTPClient) {
         self.client = client
     }
@@ -85,9 +101,26 @@ final class ArtistSearchViewModel: ObservableObject {
                 totalPages: page.totalPages
             )
         } catch {
+            if Self.isCancellation(error) {
+                return
+            }
+
             isFirstLoading = false
             isLoadingMore = false
             errorMessage = error.localizedDescription
         }
+    }
+
+    private static func isCancellation(_ error: Error) -> Bool {
+        if error is CancellationError {
+            return true
+        }
+
+        let nsError = error as NSError
+        return nsError.domain == NSURLErrorDomain && nsError.code == NSURLErrorCancelled
+    }
+
+    private var trimmedSearchText: String {
+        searchText.trimmingCharacters(in: .whitespacesAndNewlines)
     }
 }

@@ -30,6 +30,8 @@ final class ArtistSearchViewModelTests: XCTestCase {
         XCTAssertNil(sut.errorMessage)
         XCTAssertEqual(sut.paginated.currentPage, 0)
         XCTAssertEqual(sut.paginated.totalPages, 0)
+        XCTAssertEqual(sut.emptyStateTitle, "Start Searching")
+        XCTAssertEqual(sut.emptyStateMessage, "Find artists on Discogs")
     }
 
     @MainActor
@@ -179,6 +181,37 @@ final class ArtistSearchViewModelTests: XCTestCase {
         XCTAssertFalse(sut.isLoadingMore)
         XCTAssertEqual(sut.errorMessage, "next page failed")
     }
+
+    @MainActor
+    func test_emptyState_whenInitialState_showsStartSearchingMessage() {
+        let sut = ArtistSearchViewModel(client: FakeHTTPClient())
+
+        XCTAssertEqual(sut.emptyStateTitle, "Start Searching")
+        XCTAssertEqual(sut.emptyStateMessage, "Find artists on Discogs")
+    }
+
+    @MainActor
+    func test_emptyState_whenSearchedAndNoResults_showsNoResultsMessage() async {
+        let client = FakeHTTPClient()
+        client.responses = [
+            .success(
+                data: makeSearchPayload(
+                    page: 1,
+                    pages: 1,
+                    results: []
+                ),
+                statusCode: 200
+            )
+        ]
+        let sut = ArtistSearchViewModel(client: client)
+        sut.searchText = "Unknown Artist"
+
+        await sut.searchDebounced(query: sut.searchText)
+
+        XCTAssertEqual(sut.emptyStateTitle, "No Results")
+        XCTAssertEqual(sut.emptyStateMessage, "No matches found for \"Unknown Artist\"")
+    }
+
 }
 
 private func makeSearchPayload(

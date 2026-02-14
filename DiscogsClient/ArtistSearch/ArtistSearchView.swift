@@ -29,9 +29,9 @@ struct ArtistSearchView: View {
                     )
                 } else if viewModel.paginated.items.isEmpty, !viewModel.isFirstLoading, viewModel.errorMessage == nil {
                     ContentUnavailableView(
-                        emptyStateTitle,
+                        viewModel.emptyStateTitle,
                         systemImage: "magnifyingglass",
-                        description: Text(emptyStateMessage)
+                        description: Text(viewModel.emptyStateMessage)
                     )
                 } else {
                     VStack(spacing: 0) {
@@ -107,31 +107,4 @@ struct ArtistSearchView: View {
         }
     }
 
-    private var trimmedSearchText: String {
-        viewModel.searchText.trimmingCharacters(in: .whitespacesAndNewlines)
-    }
-
-    private var emptyStateTitle: String {
-        if !viewModel.hasSearched {
-            return "Start Searching"
-        }
-
-        if !trimmedSearchText.isEmpty {
-            return "No Results"
-        }
-
-        return "No Recent Searches"
-    }
-
-    private var emptyStateMessage: String {
-        if !viewModel.hasSearched {
-            return "Find artists on Discogs"
-        }
-
-        if !trimmedSearchText.isEmpty {
-            return "No matches found for \"\(trimmedSearchText)\""
-        }
-
-        return "Your recent searches will appear here"
-    }
 }
