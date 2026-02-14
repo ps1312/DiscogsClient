@@ -3,24 +3,21 @@ import SwiftUI
 struct ArtistSearchView: View {
     private let client: HTTPClient
 
-    @State private var searchText = "Red hot"
-    @State private var results: [Artist] = []
-    @State private var isLoading = false
-    @State private var errorMessage: String?
-    @State private var hasSearched = false
+    @ObservedObject private var viewModel: ArtistSearchViewModel
     
-    init(httpClient: HTTPClient) {
+    init(httpClient: HTTPClient, viewModel: ArtistSearchViewModel) {
         self.client = httpClient
+        self.viewModel = viewModel
     }
 
     var body: some View {
         NavigationStack {
             VStack {
-                if isLoading, results.isEmpty {
+                if viewModel.isFirstLoading, viewModel.results.isEmpty {
                     Spacer()
                     ProgressView()
                     Spacer()
-                } else if results.isEmpty, !isLoading, errorMessage == nil {
+                } else if viewModel.results.isEmpty, !viewModel.isFirstLoading, viewModel.errorMessage == nil {
                     Spacer()
                     VStack(spacing: 10) {
                         Image(systemName: "magnifyingglass")
@@ -38,11 +35,26 @@ struct ArtistSearchView: View {
                     .padding(.horizontal, 24)
                     Spacer()
                 } else {
-                    List(results) { artist in
-                        NavigationLink {
-                            ArtistDetailView(client: client, item: artist)
-                        } label: {
-                            listItemRow(for: artist)
+                    List {
+                        ForEach(viewModel.results) { artist in
+                            NavigationLink {
+                                ArtistDetailView(client: client, item: artist)
+                            } label: {
+                                listItemRow(for: artist)
+                            }
+                            .onAppear {
+                                guard artist.id == viewModel.results.last?.id else { return }
+                                Task { await viewModel.loadNextPage() }
+                            }
+                        }
+
+                        if viewModel.isLoadingMore {
+                            HStack {
+                                Spacer()
+                                ProgressView()
+                                Spacer()
+                            }
+                            .padding()
                         }
                     }
                 }
@@ -50,12 +62,12 @@ struct ArtistSearchView: View {
             .navigationTitle("Discogs")
             .navigationBarTitleDisplayMode(.inline)
             .searchable(
-                text: $searchText,
+                text: $viewModel.searchText,
                 prompt: "Search for artists...",
             )
         }
-        .task(id: searchText) {
-            await debouncedSearch()
+        .task(id: viewModel.searchText) {
+            await viewModel.searchDebounced(query: viewModel.searchText)
         }
     }
    
@@ -73,64 +85,12 @@ struct ArtistSearchView: View {
         }
     }
 
-    private func debouncedSearch() async {
-        let query = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
-        
-        guard !query.isEmpty else {
-            await MainActor.run {
-                hasSearched = false
-                results = []
-                errorMessage = nil
-                isLoading = false
-            }
-            return
-        }
-
-        await MainActor.run {
-            isLoading = true
-            errorMessage = nil
-            results = []
-        }
-
-        do {
-            try await Task.sleep(nanoseconds: 500_000_000)
-        } catch {
-            return
-        }
-
-        await fetchDiscogsSearch(query: query)
-    }
-
-    private func fetchDiscogsSearch(query: String) async {
-        await MainActor.run {
-            hasSearched = true
-            isLoading = true
-            errorMessage = nil
-        }
-
-        do {
-            let request = ApiRequestBuilder.search(query: query)
-            let (data, response) = try await client.send(request)
-            let artists = try ArtistSearchMapper.map(data, response)
-            
-            await MainActor.run {
-                results = artists
-                isLoading = false
-            }
-        } catch {
-            await MainActor.run {
-                isLoading = false
-                errorMessage = error.localizedDescription
-            }
-        }
-    }
-
     private var trimmedSearchText: String {
-        searchText.trimmingCharacters(in: .whitespacesAndNewlines)
+        viewModel.searchText.trimmingCharacters(in: .whitespacesAndNewlines)
     }
 
     private var emptyStateTitle: String {
-        if !hasSearched {
+        if !viewModel.hasSearched {
             return "Start Searching"
         }
 
@@ -142,7 +102,7 @@ struct ArtistSearchView: View {
     }
 
     private var emptyStateMessage: String {
-        if !hasSearched {
+        if !viewModel.hasSearched {
             return "Find artists on Discogs"
         }
 
@@ -155,5 +115,8 @@ struct ArtistSearchView: View {
 }
 
 #Preview {
-    ArtistSearchView(httpClient: URLSession.shared)
+    ArtistSearchView(
+        httpClient: URLSession.shared,
+        viewModel: ArtistSearchViewModel(client: URLSession.shared)
+    )
 }

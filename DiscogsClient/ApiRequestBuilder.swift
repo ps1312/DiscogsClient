@@ -4,12 +4,13 @@ class ApiRequestBuilder {
     private static let token = "gMBGYHrUBKsPAJRDmMTbGCLgHlJrdHbMxlCGOqSM"
     private static let userAgent = "DiscogsClient/1.0"
     
-    static func search(query: String) -> URLRequest {
+    static func search(query: String, page: Int = 1) -> URLRequest {
         var components = URLComponents(string: "https://api.discogs.com/database/search")!
         
         components.queryItems = [
             URLQueryItem(name: "q", value: query),
             URLQueryItem(name: "type", value: "artist"),
+            URLQueryItem(name: "page", value: "\(page)"),
             URLQueryItem(name: "per_page", value: "30")
         ]
         
