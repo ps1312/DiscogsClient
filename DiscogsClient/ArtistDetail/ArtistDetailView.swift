@@ -61,7 +61,7 @@ struct ArtistDetailView: View {
 
                 VStack(alignment: .leading, spacing: 10) {
                     detailRow(label: "Discogs ID", value: String(viewModel.artist.id))
-                    detailRow(label: "Type", value: "Artist")
+                    detailRow(label: "Type", value: viewModel.artistType)
                 }
                 .padding(.horizontal, 20)
 

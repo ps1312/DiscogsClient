@@ -223,6 +223,40 @@ final class ArtistDetailViewModelTests: XCTestCase {
         )
         XCTAssertEqual(sut.orderedBandMembers?.map(\.id), [2, 4, 1, 3])
     }
+
+    @MainActor
+    func test_artistType_withBandMembers_returnsBand() async {
+        let existingArtist = Artist(
+            id: 42,
+            title: "Band",
+            thumbUrl: nil,
+            imageUrl: nil,
+            profile: nil,
+            bandMembers: [BandMember(id: 1, name: "Member One", active: true)]
+        )
+        let sut = ArtistDetailViewModel(client: FakeHTTPClient(), existing: existingArtist)
+        
+        await sut.fetchArtistDetailsIfNeeded()
+
+        XCTAssertEqual(sut.artistType, "Band")
+    }
+
+    @MainActor
+    func test_artistType_withoutBandMembers_returnsArtist() async {
+        let existingArtist = Artist(
+            id: 42,
+            title: "Solo",
+            thumbUrl: nil,
+            imageUrl: nil,
+            profile: nil,
+            bandMembers: nil
+        )
+        let sut = ArtistDetailViewModel(client: FakeHTTPClient(), existing: existingArtist)
+        
+        await sut.fetchArtistDetailsIfNeeded()
+
+        XCTAssertEqual(sut.artistType, "Artist")
+    }
 }
 
 private func makeArtistDetailPayload(

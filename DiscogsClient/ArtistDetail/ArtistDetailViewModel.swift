@@ -20,6 +20,13 @@ final class ArtistDetailViewModel: ObservableObject {
         return activeMembers + inactiveMembers
     }
 
+    var artistType: String {
+        guard let members = artist.bandMembers, !members.isEmpty else {
+            return "Artist"
+        }
+        return "Band"
+    }
+
     init(client: HTTPClient, existing: Artist) {
         self.client = client
         self.artist = existing
