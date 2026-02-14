@@ -4,7 +4,6 @@ struct ArtistAlbumsView: View {
     @StateObject private var viewModel: ArtistAlbumsViewModel
 
     @State private var selectedYear: Int?
-    @State private var selectedGenre: String?
     @State private var selectedLabel: String?
 
     init(viewModel: ArtistAlbumsViewModel) {
@@ -13,14 +12,6 @@ struct ArtistAlbumsView: View {
 
     private var albums: [ArtistRelease] {
         viewModel.paginated.items
-    }
-
-    private var availableYears: [Int] {
-        Array(Set(albums.compactMap(\.year))).sorted(by: >)
-    }
-
-    private var availableLabels: [String] {
-        Array(Set(albums.compactMap(\.label))).sorted()
     }
 
     private var filteredAlbums: [ArtistRelease] {
@@ -49,7 +40,11 @@ struct ArtistAlbumsView: View {
                 }
             } else {
                 VStack(alignment: .leading, spacing: 12) {
-                    filterControls
+                    ArtistAlbumsFilterView(
+                        viewModel: viewModel,
+                        selectedYear: $selectedYear,
+                        selectedLabel: $selectedLabel
+                    )
 
                     if filteredAlbums.isEmpty {
                         ContentUnavailableView(
@@ -105,59 +100,8 @@ struct ArtistAlbumsView: View {
         .task(id: viewModel.artistID) {
             await viewModel.fetchAlbums()
             selectedYear = nil
-            selectedGenre = nil
             selectedLabel = nil
         }
-    }
-
-    private var filterControls: some View {
-        HStack(spacing: 8) {
-            Menu {
-                Button("All Years") { selectedYear = nil }
-                ForEach(availableYears, id: \.self) { year in
-                    Button(String(year)) { selectedYear = year }
-                }
-            } label: {
-                filterChip(title: selectedYear.map(String.init) ?? "Year")
-            }
-            .frame(width: 108)
-
-            Menu {
-                Button("All Labels") { selectedLabel = nil }
-                ForEach(availableLabels, id: \.self) { label in
-                    Button(label) { selectedLabel = label }
-                }
-            } label: {
-                filterChip(title: selectedLabel ?? "Label")
-            }
-            .frame(width: 124)
-
-            Spacer(minLength: 0)
-
-            Text("Page \(viewModel.paginated.currentPage) / \(viewModel.paginated.totalPages)")
-                .font(.caption)
-                .foregroundStyle(.secondary)
-                .lineLimit(1)
-        }
-        .padding(.horizontal)
-        .animation(.none, value: selectedYear)
-        .animation(.none, value: selectedGenre)
-        .animation(.none, value: selectedLabel)
-    }
-
-    private func filterChip(title: String) -> some View {
-        HStack(spacing: 6) {
-            Text(title)
-                .lineLimit(1)
-                .truncationMode(.tail)
-                .frame(maxWidth: .infinity, alignment: .leading)
-            Image(systemName: "chevron.down")
-                .font(.caption2)
-        }
-        .font(.subheadline)
-        .padding(.horizontal, 10)
-        .padding(.vertical, 6)
-        .background(Color(uiColor: .secondarySystemFill), in: Capsule())
     }
 
     private func metadataText(for release: ArtistRelease) -> String {
