@@ -21,23 +21,18 @@ struct ArtistSearchView: View {
                     Spacer()
                     ProgressView()
                     Spacer()
+                } else if viewModel.paginated.items.isEmpty, let errorMessage = viewModel.errorMessage {
+                    ContentUnavailableView(
+                        "Search Failed",
+                        systemImage: "exclamationmark.triangle",
+                        description: Text(errorMessage)
+                    )
                 } else if viewModel.paginated.items.isEmpty, !viewModel.isFirstLoading, viewModel.errorMessage == nil {
-                    Spacer()
-                    VStack(spacing: 10) {
-                        Image(systemName: "magnifyingglass")
-                            .font(.system(size: 44, weight: .light))
-                            .foregroundStyle(.secondary)
-
-                        Text(emptyStateTitle)
-                            .font(.title3.weight(.semibold))
-
-                        Text(emptyStateMessage)
-                            .font(.body)
-                            .foregroundStyle(.secondary)
-                            .multilineTextAlignment(.center)
-                    }
-                    .padding(.horizontal, 24)
-                    Spacer()
+                    ContentUnavailableView(
+                        emptyStateTitle,
+                        systemImage: "magnifyingglass",
+                        description: Text(emptyStateMessage)
+                    )
                 } else {
                     VStack(spacing: 0) {
                         HStack {
@@ -140,4 +135,3 @@ struct ArtistSearchView: View {
         return "Your recent searches will appear here"
     }
 }
-
