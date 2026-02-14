@@ -6,6 +6,11 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		3AA332D62F40D3D7002462D2 /* SwiftLintFramework in Frameworks */ = {isa = PBXBuildFile; productRef = 3AA332D52F40D3D7002462D2 /* SwiftLintFramework */; };
+		3AA332D82F40D3D7002462D2 /* swiftlint in Frameworks */ = {isa = PBXBuildFile; productRef = 3AA332D72F40D3D7002462D2 /* swiftlint */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		3A46CDFF2F40215800240ECA /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -59,6 +64,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3AA332D62F40D3D7002462D2 /* SwiftLintFramework in Frameworks */,
+				3AA332D82F40D3D7002462D2 /* swiftlint in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -70,6 +77,7 @@
 			children = (
 				3A8C19922F3DFBFE005DC215 /* DiscogsClient */,
 				3A46CDFC2F40215800240ECA /* DiscogsClientTests */,
+				3AA332D12F40D3A9002462D2 /* Frameworks */,
 				3A8C19912F3DFBFE005DC215 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -81,6 +89,13 @@
 				3A46CDFB2F40215800240ECA /* DiscogsClientTests.xctest */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		3AA332D12F40D3A9002462D2 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -120,12 +135,15 @@
 			buildRules = (
 			);
 			dependencies = (
+				3AA332DA2F40D3E5002462D2 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				3A8C19922F3DFBFE005DC215 /* DiscogsClient */,
 			);
 			name = DiscogsClient;
 			packageProductDependencies = (
+				3AA332D52F40D3D7002462D2 /* SwiftLintFramework */,
+				3AA332D72F40D3D7002462D2 /* swiftlint */,
 			);
 			productName = DiscogsClient;
 			productReference = 3A8C19902F3DFBFE005DC215 /* DiscogsClient.app */;
@@ -159,6 +177,9 @@
 			);
 			mainGroup = 3A8C19872F3DFBFE005DC215;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				3AA332D42F40D3D7002462D2 /* XCRemoteSwiftPackageReference "SwiftLint" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 3A8C19912F3DFBFE005DC215 /* Products */;
 			projectDirPath = "";
@@ -209,6 +230,10 @@
 			isa = PBXTargetDependency;
 			target = 3A8C198F2F3DFBFE005DC215 /* DiscogsClient */;
 			targetProxy = 3A46CDFF2F40215800240ECA /* PBXContainerItemProxy */;
+		};
+		3AA332DA2F40D3E5002462D2 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			productRef = 3AA332D92F40D3E5002462D2 /* SwiftLintBuildToolPlugin */;
 		};
 /* End PBXTargetDependency section */
 
@@ -471,6 +496,35 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		3AA332D42F40D3D7002462D2 /* XCRemoteSwiftPackageReference "SwiftLint" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/realm/SwiftLint";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.63.2;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		3AA332D52F40D3D7002462D2 /* SwiftLintFramework */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 3AA332D42F40D3D7002462D2 /* XCRemoteSwiftPackageReference "SwiftLint" */;
+			productName = SwiftLintFramework;
+		};
+		3AA332D72F40D3D7002462D2 /* swiftlint */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 3AA332D42F40D3D7002462D2 /* XCRemoteSwiftPackageReference "SwiftLint" */;
+			productName = swiftlint;
+		};
+		3AA332D92F40D3E5002462D2 /* SwiftLintBuildToolPlugin */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 3AA332D42F40D3D7002462D2 /* XCRemoteSwiftPackageReference "SwiftLint" */;
+			productName = "plugin:SwiftLintBuildToolPlugin";
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 3A8C19882F3DFBFE005DC215 /* Project object */;
 }
