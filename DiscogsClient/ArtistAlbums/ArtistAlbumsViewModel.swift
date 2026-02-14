@@ -4,13 +4,15 @@ import Combine
 @MainActor
 final class ArtistAlbumsViewModel: ObservableObject {
     @Published private(set) var albums: [ArtistRelease] = []
-    @Published private(set) var isLoading = false
+    @Published private(set) var isFirstLoading = false
+    @Published private(set) var isLoadingMore = false
     @Published private(set) var errorMessage: String?
 
     let artistID: Int
 
     private let client: HTTPClient
-    private var isFetching = false
+    private var currentPage = 0
+    private var totalPages = 0
 
     init(client: HTTPClient, artistID: Int) {
         self.client = client
@@ -18,23 +20,66 @@ final class ArtistAlbumsViewModel: ObservableObject {
     }
 
     func fetchAlbums() async {
-        guard !isFetching else { return }
-
-        isFetching = true
-        isLoading = true
-        errorMessage = nil
         albums = []
+        currentPage = 0
+        totalPages = 0
+        isFirstLoading = true
+        isLoadingMore = false
+        errorMessage = nil
+
+        await loadPage(page: 1, appending: false)
+    }
+
+    func loadNextPage() async {
+        guard !isFirstLoading, !isLoadingMore else { return }
+        guard currentPage < totalPages else { return }
+
+        isLoadingMore = true
+        errorMessage = nil
+
+        await loadPage(page: currentPage + 1, appending: true)
+    }
+
+    private func loadPage(page requestedPage: Int, appending: Bool) async {
         defer {
-            isFetching = false
-            isLoading = false
+            isFirstLoading = false
+            isLoadingMore = false
         }
 
         do {
-            let request = ApiRequestBuilder.artistReleases(for: artistID)
+            let request = ApiRequestBuilder.artistReleases(for: artistID, page: requestedPage)
             let (data, response) = try await client.send(request)
-            albums = try ArtistAlbumsMapper.map(data, response)
+            let page = try ArtistAlbumsMapper.map(data, response)
+
+            guard page.page == requestedPage else { return }
+
+            currentPage = page.page
+            totalPages = page.pages
+
+            if appending {
+                albums.append(contentsOf: page.albums)
+            } else {
+                albums = page.albums
+            }
+            albums.sort(by: Self.albumSort)
         } catch {
             errorMessage = "Failed to load albums: \(error.localizedDescription)"
         }
+    }
+
+    private static func albumSort(lhs: ArtistRelease, rhs: ArtistRelease) -> Bool {
+        let lhsYear = lhs.year ?? Int.min
+        let rhsYear = rhs.year ?? Int.min
+
+        if lhsYear != rhsYear {
+            return lhsYear > rhsYear
+        }
+
+        let titleOrder = lhs.title.localizedCaseInsensitiveCompare(rhs.title)
+        if titleOrder != .orderedSame {
+            return titleOrder == .orderedAscending
+        }
+
+        return lhs.id < rhs.id
     }
 }

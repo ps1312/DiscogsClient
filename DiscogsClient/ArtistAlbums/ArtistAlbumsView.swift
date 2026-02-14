@@ -29,9 +29,9 @@ struct ArtistAlbumsView: View {
 
     var body: some View {
         Group {
-            if viewModel.isLoading {
+            if viewModel.isFirstLoading && viewModel.albums.isEmpty {
                 ProgressView()
-            } else if let errorMessage = viewModel.errorMessage {
+            } else if viewModel.albums.isEmpty, let errorMessage = viewModel.errorMessage {
                 Text(errorMessage)
                     .foregroundStyle(.red)
                     .font(.footnote)
@@ -55,24 +55,46 @@ struct ArtistAlbumsView: View {
                         )
                     }
 
-                    List(filteredAlbums) { release in
-                        HStack(spacing: 12) {
-                            AsyncImageWithFallback(url: release.thumbnailURL)
-                                .frame(width: 54, height: 54)
-                                .clipShape(RoundedRectangle(cornerRadius: 8))
+                    List {
+                        ForEach(filteredAlbums) { release in
+                            HStack(spacing: 12) {
+                                AsyncImageWithFallback(url: release.thumbnailURL)
+                                    .frame(width: 54, height: 54)
+                                    .clipShape(RoundedRectangle(cornerRadius: 8))
 
-                            VStack(alignment: .leading, spacing: 4) {
-                                Text(release.title)
-                                    .font(.headline)
-                                    .lineLimit(2)
-                                Text(metadataText(for: release))
-                                    .font(.caption)
-                                    .foregroundStyle(.secondary)
+                                VStack(alignment: .leading, spacing: 4) {
+                                    Text(release.title)
+                                        .font(.headline)
+                                        .lineLimit(2)
+                                    Text(metadataText(for: release))
+                                        .font(.caption)
+                                        .foregroundStyle(.secondary)
+                                }
+                            }
+                            .padding(.vertical, 4)
+                            .onAppear {
+                                guard release.id == filteredAlbums.last?.id else { return }
+                                Task { await viewModel.loadNextPage() }
                             }
                         }
-                        .padding(.vertical, 4)
+
+                        if viewModel.isLoadingMore {
+                            HStack {
+                                Spacer()
+                                ProgressView()
+                                Spacer()
+                            }
+                            .padding()
+                        }
                     }
                     .listRowSeparator(.hidden)
+
+                    if let errorMessage = viewModel.errorMessage {
+                        Text(errorMessage)
+                            .foregroundStyle(.red)
+                            .font(.footnote)
+                            .padding(.horizontal)
+                    }
                 }
             }
         }

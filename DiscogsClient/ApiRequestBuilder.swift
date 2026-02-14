@@ -27,9 +27,10 @@ class ApiRequestBuilder {
         return addAuthHeaders(to: request)
     }
 
-    static func artistReleases(for artistId: Int) -> URLRequest {
+    static func artistReleases(for artistId: Int, page: Int = 1) -> URLRequest {
         var components = URLComponents(string: "https://api.discogs.com/artists/\(artistId)/releases")!
         components.queryItems = [
+            URLQueryItem(name: "page", value: "\(page)"),
             URLQueryItem(name: "per_page", value: "30"),
             URLQueryItem(name: "sort", value: "year"),
             URLQueryItem(name: "sort_order", value: "desc")

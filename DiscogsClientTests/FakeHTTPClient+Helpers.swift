@@ -37,3 +37,14 @@ final class FakeHTTPClient: HTTPClient {
         }
     }
 }
+
+func queryValue(named name: String, in request: URLRequest) -> String? {
+    guard
+        let url = request.url,
+        let components = URLComponents(url: url, resolvingAgainstBaseURL: false)
+    else {
+        return nil
+    }
+
+    return components.queryItems?.first(where: { $0.name == name })?.value
+}
