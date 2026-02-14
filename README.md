@@ -62,7 +62,7 @@ This choice was made because it facilitates a lot when implementing unit tests, 
 1. Data problems with the albums endpoint:
    - Duplicated ids on results (`screenshots/duplicate_release_results.png`). This was fixed by deduping the responses on the albums view model.
    - No support for filters, the filtering has to be done locally. This raises some bad UX, like the filters increasing in size as the user paginates (older records add older years to the filter).
-   - No "genre" support in `/artists/{id}/releases`. The endpoint does not expose reliable genre property in the response. Year/label are derived from the json fields and processed locally.
+   - No "genre" support in `/artists/{id}/releases`. The endpoint does not expose reliable genre property in the response. Year/label are derived from the json fields and processed locally. That's why I added the "Genre" filter but disabled.
 
 2. Can't use the `/search` endpoint to fetch only **albums** because the endpoint also returns albums from other bands with the same name. To get more reliable data it's better to use `/artists/{id}/releases`.
 
