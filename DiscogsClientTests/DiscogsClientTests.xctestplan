@@ -1,0 +1,25 @@
+{
+  "configurations" : [
+    {
+      "id" : "A6F1B5D4-CC83-49EF-B299-C0073BFA6BCB",
+      "name" : "Test Scheme Action",
+      "options" : {
+
+      }
+    }
+  ],
+  "defaultOptions" : {
+    "performanceAntipatternCheckerEnabled" : true
+  },
+  "testTargets" : [
+    {
+      "parallelizable" : false,
+      "target" : {
+        "containerPath" : "container:DiscogsClient.xcodeproj",
+        "identifier" : "3A46CDFA2F40215800240ECA",
+        "name" : "DiscogsClientTests"
+      }
+    }
+  ],
+  "version" : 1
+}

@@ -21,9 +21,22 @@
 		3A8C19902F3DFBFE005DC215 /* DiscogsClient.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DiscogsClient.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		3AA332B62F403243002462D2 /* Exceptions for "DiscogsClientTests" folder in "DiscogsClientTests" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				DiscogsClientTests.xctestplan,
+			);
+			target = 3A46CDFA2F40215800240ECA /* DiscogsClientTests */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		3A46CDFC2F40215800240ECA /* DiscogsClientTests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				3AA332B62F403243002462D2 /* Exceptions for "DiscogsClientTests" folder in "DiscogsClientTests" target */,
+			);
 			path = DiscogsClientTests;
 			sourceTree = "<group>";
 		};
