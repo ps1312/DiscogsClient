@@ -92,7 +92,7 @@ struct ArtistSearchView: View {
                 text: $viewModel.searchText,
                 prompt: "Search for artists...",
             )
-            .searchFocused($isSearchFieldFocused)
+            .applySearchFocus($isSearchFieldFocused)
             .onAppear {
                 guard !hasAppliedInitialSearchFocus else { return }
                 hasAppliedInitialSearchFocus = true
@@ -141,5 +141,16 @@ private struct NoResultsEmptyView: View {
             systemImage: "magnifyingglass",
             description: Text("No matches found for \"\(query)\"")
         )
+    }
+}
+
+private extension View {
+    @ViewBuilder
+    func applySearchFocus(_ focusBinding: FocusState<Bool>.Binding) -> some View {
+        if #available(iOS 18.0, *) {
+            self.searchFocused(focusBinding)
+        } else {
+            self
+        }
     }
 }
