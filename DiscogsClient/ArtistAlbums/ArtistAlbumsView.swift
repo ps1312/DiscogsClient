@@ -4,7 +4,7 @@ struct ArtistAlbumsView: View {
     let client: HTTPClient
     let artistID: Int
 
-    @State private var albums: [DiscogsArtistRelease] = []
+    @State private var albums: [ArtistRelease] = []
     @State private var isLoading = false
     @State private var errorMessage: String?
     @State private var selectedYear: Int?
@@ -15,20 +15,15 @@ struct ArtistAlbumsView: View {
         Array(Set(albums.compactMap(\.year))).sorted(by: >)
     }
 
-    private var availableGenres: [String] {
-        Array(Set(albums.flatMap(\.genreNames))).sorted()
-    }
-
     private var availableLabels: [String] {
-        Array(Set(albums.compactMap(\.labelName))).sorted()
+        Array(Set(albums.compactMap(\.label))).sorted()
     }
 
-    private var filteredAlbums: [DiscogsArtistRelease] {
+    private var filteredAlbums: [ArtistRelease] {
         albums.filter { release in
             let matchesYear = selectedYear == nil || release.year == selectedYear
-            let matchesGenre = selectedGenre.map(release.genreNames.contains) ?? true
-            let matchesLabel = selectedLabel == nil || release.labelName == selectedLabel
-            return matchesYear && matchesGenre && matchesLabel
+            let matchesLabel = selectedLabel == nil || release.label == selectedLabel
+            return matchesYear && matchesLabel
         }
     }
 
@@ -99,16 +94,6 @@ struct ArtistAlbumsView: View {
             .frame(width: 108)
 
             Menu {
-                Button("All Genres") { selectedGenre = nil }
-                ForEach(availableGenres, id: \.self) { genre in
-                    Button(genre) { selectedGenre = genre }
-                }
-            } label: {
-                filterChip(title: selectedGenre ?? "Genre")
-            }
-            .frame(width: 124)
-
-            Menu {
                 Button("All Labels") { selectedLabel = nil }
                 ForEach(availableLabels, id: \.self) { label in
                     Button(label) { selectedLabel = label }
@@ -139,28 +124,12 @@ struct ArtistAlbumsView: View {
         .background(Color(uiColor: .secondarySystemFill), in: Capsule())
     }
 
-    private func metadataText(for release: DiscogsArtistRelease) -> String {
+    private func metadataText(for release: ArtistRelease) -> String {
         var parts: [String] = [release.year.map(String.init) ?? "Unknown year"]
-        if let genre = release.genreNames.first {
-            parts.append(genre)
-        }
-        if let label = release.labelName {
+        if let label = release.label {
             parts.append(label)
         }
         return parts.joined(separator: " • ")
-    }
-
-    @ViewBuilder
-    private func albumArtwork(for release: DiscogsArtistRelease) -> some View {
-        AsyncImage(url: release.thumbnailURL) { phase in
-            if let image = phase.image {
-                image.resizable().scaledToFill()
-            } else {
-                Image(systemName: "opticaldisc")
-                    .font(.system(size: 28, weight: .light))
-                    .foregroundStyle(.secondary)
-            }
-        }
     }
 
     private func fetchAlbums() async {
@@ -172,10 +141,8 @@ struct ArtistAlbumsView: View {
         
         do {
             let request = ApiRequestBuilder.artistReleases(for: artistID)
-            let (data, _) = try await client.send(request)
-
-            let decoded = try JSONDecoder().decode(DiscogsArtistReleasesResponse.self, from: data)
-            let filteredAlbums = decoded.releases.filter(\.isAlbum)
+            let (data, response) = try await client.send(request)
+            let filteredAlbums = try ArtistAlbumsMapper.map(data, response)
 
             await MainActor.run {
                 albums = filteredAlbums
@@ -190,59 +157,5 @@ struct ArtistAlbumsView: View {
                 errorMessage = "Failed to load albums: \(error.localizedDescription)"
             }
         }
-    }
-}
-
-private struct DiscogsArtistReleasesResponse: Decodable {
-    let releases: [DiscogsArtistRelease]
-}
-
-struct DiscogsArtistRelease: Decodable, Identifiable {
-    let id: Int
-    let title: String
-    let year: Int?
-    let thumb: String?
-    let format: String?
-    let type: String?
-    let genreNames: [String]
-    let labelName: String?
-
-    private enum CodingKeys: String, CodingKey {
-        case id
-        case title
-        case year
-        case thumb
-        case format
-        case type
-        case genre
-        case genres
-        case label
-    }
-
-    init(from decoder: Decoder) throws {
-        let container = try decoder.container(keyedBy: CodingKeys.self)
-        id = try container.decode(Int.self, forKey: .id)
-        title = try container.decode(String.self, forKey: .title)
-        year = try container.decodeIfPresent(Int.self, forKey: .year)
-        thumb = try container.decodeIfPresent(String.self, forKey: .thumb)
-        format = try container.decodeIfPresent(String.self, forKey: .format)
-        type = try container.decodeIfPresent(String.self, forKey: .type)
-
-        let singleGenre = try container.decodeIfPresent(String.self, forKey: .genre).map { [$0] } ?? []
-        let multipleGenres = try container.decodeIfPresent([String].self, forKey: .genres) ?? []
-        genreNames = Array(Set(singleGenre + multipleGenres)).sorted()
-
-        labelName = try container.decodeIfPresent(String.self, forKey: .label)
-    }
-
-    var thumbnailURL: URL? {
-        guard let thumb, !thumb.isEmpty else { return nil }
-        return URL(string: thumb)
-    }
-
-    var isAlbum: Bool {
-        let formatText = format?.lowercased() ?? ""
-        let typeText = type?.lowercased() ?? ""
-        return formatText.contains("album") || typeText == "master"
     }
 }
