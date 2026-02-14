@@ -6,13 +6,7 @@ class ArtistAlbumsMapper {
         let releases: [ArtistRelease]
     }
 
-    struct PaginatedAlbums {
-        let albums: [ArtistRelease]
-        let page: Int
-        let pages: Int
-    }
-
-    static func map(_ data: Data, _ response: HTTPURLResponse) throws -> PaginatedAlbums {
+    static func map(_ data: Data, _ response: HTTPURLResponse) throws -> Paginated<ArtistRelease> {
         let decoded = try JSONDecoder().decode(Root.self, from: data)
 
         let albums = decoded.releases.filter {
@@ -21,10 +15,10 @@ class ArtistAlbumsMapper {
             return formatText.contains("album") || typeText == "master"
         }
 
-        return PaginatedAlbums(
-            albums: albums,
-            page: decoded.pagination.page,
-            pages: decoded.pagination.pages
+        return Paginated(
+            items: albums,
+            currentPage: decoded.pagination.page,
+            totalPages: decoded.pagination.pages
         )
     }
 }

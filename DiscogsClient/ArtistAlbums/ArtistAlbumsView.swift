@@ -11,16 +11,20 @@ struct ArtistAlbumsView: View {
         _viewModel = StateObject(wrappedValue: viewModel)
     }
 
+    private var albums: [ArtistRelease] {
+        viewModel.paginated.items
+    }
+
     private var availableYears: [Int] {
-        Array(Set(viewModel.albums.compactMap(\.year))).sorted(by: >)
+        Array(Set(albums.compactMap(\.year))).sorted(by: >)
     }
 
     private var availableLabels: [String] {
-        Array(Set(viewModel.albums.compactMap(\.label))).sorted()
+        Array(Set(albums.compactMap(\.label))).sorted()
     }
 
     private var filteredAlbums: [ArtistRelease] {
-        viewModel.albums.filter { release in
+        albums.filter { release in
             let matchesYear = selectedYear == nil || release.year == selectedYear
             let matchesLabel = selectedLabel == nil || release.label == selectedLabel
             return matchesYear && matchesLabel
@@ -29,13 +33,13 @@ struct ArtistAlbumsView: View {
 
     var body: some View {
         Group {
-            if viewModel.isFirstLoading && viewModel.albums.isEmpty {
+            if viewModel.isFirstLoading && albums.isEmpty {
                 ProgressView()
-            } else if viewModel.albums.isEmpty, let errorMessage = viewModel.errorMessage {
+            } else if albums.isEmpty, let errorMessage = viewModel.errorMessage {
                 Text(errorMessage)
                     .foregroundStyle(.red)
                     .font(.footnote)
-            } else if viewModel.albums.isEmpty {
+            } else if albums.isEmpty {
                 VStack(spacing: 10) {
                     Image(systemName: "opticaldisc")
                         .font(.system(size: 44, weight: .light))
@@ -130,7 +134,7 @@ struct ArtistAlbumsView: View {
 
             Spacer(minLength: 0)
 
-            Text("Page \(viewModel.currentPage) / \(viewModel.totalPages)")
+            Text("Page \(viewModel.paginated.currentPage) / \(viewModel.paginated.totalPages)")
                 .font(.caption)
                 .foregroundStyle(.secondary)
                 .lineLimit(1)

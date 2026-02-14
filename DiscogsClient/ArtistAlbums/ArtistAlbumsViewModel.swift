@@ -3,16 +3,30 @@ import Combine
 
 @MainActor
 final class ArtistAlbumsViewModel: ObservableObject {
-    @Published private(set) var albums: [ArtistRelease] = []
     @Published private(set) var isFirstLoading = false
     @Published private(set) var isLoadingMore = false
     @Published private(set) var errorMessage: String?
-    @Published private(set) var currentPage = 0
-    @Published private(set) var totalPages = 0
+    @Published private(set) var paginated = Paginated<ArtistRelease>(
+        items: [],
+        currentPage: 0,
+        totalPages: 0
+    )
 
     let artistID: Int
 
     private let client: HTTPClient
+
+    var albums: [ArtistRelease] {
+        paginated.items
+    }
+
+    var currentPage: Int {
+        paginated.currentPage
+    }
+
+    var totalPages: Int {
+        paginated.totalPages
+    }
 
     init(client: HTTPClient, artistID: Int) {
         self.client = client
@@ -20,9 +34,7 @@ final class ArtistAlbumsViewModel: ObservableObject {
     }
 
     func fetchAlbums() async {
-        albums = []
-        currentPage = 0
-        totalPages = 0
+        paginated = Paginated(items: [], currentPage: 0, totalPages: 0)
         isFirstLoading = true
         isLoadingMore = false
         errorMessage = nil
@@ -32,7 +44,7 @@ final class ArtistAlbumsViewModel: ObservableObject {
 
     func loadNextPage() async {
         guard !isFirstLoading, !isLoadingMore else { return }
-        guard currentPage < totalPages else { return }
+        guard paginated.currentPage < paginated.totalPages else { return }
 
         isLoadingMore = true
         errorMessage = nil
@@ -51,13 +63,15 @@ final class ArtistAlbumsViewModel: ObservableObject {
             let (data, response) = try await client.send(request)
             let page = try ArtistAlbumsMapper.map(data, response)
 
-            guard page.page == requestedPage else { return }
+            guard page.currentPage == requestedPage else { return }
 
-            currentPage = page.page
-            totalPages = page.pages
-
-            albums = Self.mergeAlbums(existing: albums, incoming: page.albums)
-            albums.sort(by: Self.albumSort)
+            let mergedAlbums = Self.mergeAlbums(existing: paginated.items, incoming: page.items)
+                .sorted(by: Self.albumSort)
+            paginated = Paginated(
+                items: mergedAlbums,
+                currentPage: page.currentPage,
+                totalPages: page.totalPages
+            )
         } catch {
             errorMessage = "Failed to load albums: \(error.localizedDescription)"
         }
